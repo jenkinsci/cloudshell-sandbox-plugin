@@ -25,9 +25,9 @@ import jenkins.model.Jenkins;
 
 public abstract class CloudShellBuildStep implements Describable<CloudShellBuildStep>, ExtensionPoint {
 
-	protected CsServer CsServer;
+	protected SandboxAPIProxy CsServer;
 
-	public CsServer getCsServer() {
+	public SandboxAPIProxy getCsServer() {
 		return CsServer;
 	}
 
@@ -35,7 +35,7 @@ public abstract class CloudShellBuildStep implements Describable<CloudShellBuild
 		return Jenkins.getInstance().getDescriptorList(CloudShellBuildStep.class);
 	}
 
-	public abstract boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServer server)
+	public abstract boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server)
 			throws Exception;
 
 	public CSBuildStepDescriptor getDescriptor() {

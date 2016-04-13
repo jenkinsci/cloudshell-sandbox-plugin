@@ -19,12 +19,11 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep;
-import org.jenkinsci.plugins.cloudshell.CsServer;
+import org.jenkinsci.plugins.cloudshell.CsServerDetails;
+import org.jenkinsci.plugins.cloudshell.SandboxAPIProxy;
 import org.jenkinsci.plugins.cloudshell.VariableInjectionAction;
 import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.util.List;
 
 public class StartSandbox extends CloudShellBuildStep {
 
@@ -52,16 +51,17 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 
 
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServer server) {
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) {
 		return StartSandBox(build, launcher, listener, server);
 	}
 
-	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServer server)  {
-		String id = server.StartBluePrint(build,bpName, sbName, sbDuration, listener);
+	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails)  {
+		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
+		String id = proxy.StartBluePrint(build,bpName, sbName, sbDuration, listener);
 		build.addAction(new VariableInjectionAction("SANDBOX_ID",id));
-		SandboxLaunchAction launchAction = new SandboxLaunchAction();
+		SandboxLaunchAction launchAction = new SandboxLaunchAction(serverDetails);
 		build.addAction(launchAction);
-		launchAction.started(server,id);
+		launchAction.started(id);
 		return true;
 	}
 

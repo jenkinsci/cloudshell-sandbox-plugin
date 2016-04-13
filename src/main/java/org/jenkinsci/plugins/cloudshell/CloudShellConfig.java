@@ -46,10 +46,10 @@ public class CloudShellConfig extends Builder {
 
 	@Override
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener)  {
-        CsServer server = getDescriptor().getServer();
+		CsServerDetails serverDetails = getDescriptor().getServer();
         try
         {
-            return buildStep.perform(build, launcher, listener, server);
+            return buildStep.perform(build, launcher, listener, serverDetails);
 
         } catch (Exception e) {
             listener.getLogger().println(e);
@@ -65,7 +65,7 @@ public class CloudShellConfig extends Builder {
 	@Extension
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        private CsServer server;
+        private CsServerDetails server;
 
         public DescriptorImpl() {
             load();
@@ -90,7 +90,7 @@ public class CloudShellConfig extends Builder {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            server = new CsServer(
+            server = new CsServerDetails(
                     formData.getString("serverAddress"),
                     formData.getString("user"),
                     formData.getString("pw"),
@@ -121,7 +121,7 @@ public class CloudShellConfig extends Builder {
         public int getPort() {
             return server.port;
         }
-        public CsServer getServer() {return server;}
+        public CsServerDetails getServer() {return server;}
 
 	}
 }

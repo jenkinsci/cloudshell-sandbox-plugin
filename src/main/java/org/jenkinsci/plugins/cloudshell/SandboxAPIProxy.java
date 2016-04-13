@@ -30,30 +30,56 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.sql.Time;
 
-public class CsServer {
-	public final String serverAddress;
-    public final String user;
-    public final String pw;
-    public final int port;
+public class SandboxAPIProxy {
+    public static final String BLUEPRINT_CONFLICT_ERROR = "Blueprint has conflicting resources";
+    protected final CsServerDetails serverDetails;
 
-	public CsServer(String serverAddress, String user, String pw, int port)
-	{
-		this.user = user;
-		this.pw = pw;
-		this.serverAddress = serverAddress;
-        this.port = port;
+    public class SandboxApiException extends Exception {
+
+        public SandboxApiException(String message) {
+            super(message);
+        }
+
     }
-    public String StartBluePrint(AbstractBuild<?,?> build, String BpName, String SbName, String SbDuration, BuildListener listener)
-    {
-        String token = InvokeLogin(GetBaseUrl(), this.user, this.pw, "Global");
-        String url = GetBaseUrl() + "/v1/blueprints/"+ BpName +"/start";
 
-        String result = ExecutePost(url, token, SbName, SbDuration);
+    public class ReserveBluePrintConflictException extends SandboxApiException {
+        private String bluePrintIdentifier;
+
+        public ReserveBluePrintConflictException(String bluePrintIdentifier, String message) {
+            super(message);
+        }
+
+
+        public String getBluePrintIdentifier() {
+            return bluePrintIdentifier;
+        }
+    }
+
+
+    public SandboxAPIProxy(String serverAddress, String user, String pw, int port)
+	{
+        this.serverDetails=new CsServerDetails(serverAddress,user,pw,port);
+    }
+
+    public SandboxAPIProxy(CsServerDetails serverDetails){
+        this.serverDetails=serverDetails;
+    }
+
+    public String StartBluePrint(AbstractBuild<?,?> build, String bluePrintName, String sandBoxName, String duration, BuildListener listener)
+            throws SandboxApiException
+    {
+        String token = InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
+        String url = GetBaseUrl() + "/v1/blueprints/"+ bluePrintName +"/start";
+
+        String result = ExecutePost(url, token, sandBoxName, duration);
         JSONObject j = JSONObject.fromObject(result);
-        if (j.toString().contains("errorCategory")) {
-            throw new RuntimeException("Failed to start blueprint: " + j);
+        if (j.containsKey("errorCategory")) {
+            String message = j.get("message").toString();
+            if (message.equals(BLUEPRINT_CONFLICT_ERROR)){
+                throw new ReserveBluePrintConflictException(bluePrintName,message);
+            }
+            throw new SandboxApiException(bluePrintName);
         }
         try
         {
@@ -72,7 +98,7 @@ public class CsServer {
 
     public void StopBluePrint(String SbId, BuildListener listener)
     {
-        String token = InvokeLogin(GetBaseUrl(), this.user, this.pw, "Global");
+        String token = InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
         String url = GetBaseUrl() + "/v1/sandboxes/" + SbId + "/stop";
 
         String result = ExecutePost(url, token, null, null);
@@ -111,18 +137,9 @@ public class CsServer {
         }
     }
 
-    public void GetBluePrintDetails(String BpName, BuildListener listener)
-    {
-        //TODO : Need to query the specific blueprint
-        listener.getLogger().println("Get Blueprint By Name");
-        String token = InvokeLogin(GetBaseUrl(), this.user, this.pw, "Global");
-        String url = GetBaseUrl() + "/v1/blueprints";
-        listener.getLogger().println(ExecuteGet(url, token));
-    }
-
     private JSONObject SandboxDetails(String sb)
     {
-        String token = InvokeLogin(GetBaseUrl(), this.user, this.pw, "Global");
+        String token = InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
         String url = GetBaseUrl() + "/v1/sandboxes/" + sb;
         String result = ExecuteGet(url, token);
         JSONObject j = JSONObject.fromObject(result);
@@ -131,12 +148,6 @@ public class CsServer {
             throw new RuntimeException("Failed to get sandbox details: " + j);
         }
         return j;
-    }
-
-    public void GetSandBoxDetails(String SbId, BuildListener listener)
-    {
-        listener.getLogger().println("Get SandBox By Id: ");
-        listener.getLogger().println(SandboxDetails(SbId));
     }
 
     public String InvokeLogin(String url, String user, String password, String domain) {
@@ -226,9 +237,13 @@ public class CsServer {
         HttpResponse response = null;
         try {
             response = client.execute(request);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        int statusCode = response.getStatusLine().getStatusCode();
+
         BufferedReader rd = null;
         try {
             rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -250,7 +265,7 @@ public class CsServer {
 
     private String GetBaseUrl()
     {
-        return "http://" + this.serverAddress + ":" + this.port + "/Api";
+        return "http://" + this.serverDetails.serverAddress + ":" + this.serverDetails.port + "/Api";
     }
 
 }

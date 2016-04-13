@@ -14,17 +14,14 @@
  */
 package org.jenkinsci.plugins.cloudshell.builders;
 
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep;
-import org.jenkinsci.plugins.cloudshell.CsServer;
-import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
+import org.jenkinsci.plugins.cloudshell.CsServerDetails;
+import org.jenkinsci.plugins.cloudshell.SandboxAPIProxy;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.IOException;
 
 public class StopSandbox extends CloudShellBuildStep {
 
@@ -40,9 +37,9 @@ public class StopSandbox extends CloudShellBuildStep {
 		return SbId;
 	}
 
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServer server) {
-
-		server.StopBluePrint(SbId, listener);
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) {
+		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
+		proxy.StopBluePrint(SbId, listener);
 		return true;
 	}
 
