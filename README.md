@@ -22,9 +22,11 @@ Use a pre-scm step to start a sandbox and a post-build step for stopping running
 node: make sure to check the "Fail the build on error" when using the pre-scm step, this will fail the build in case the sandbox will fail to create.
 
 Pre-scm step:
+
 ![Alt text](Pics/PreSCM.png?raw=true)
 
 Post build step:
+
 ![Alt text](Pics/postBuild.png?raw=true)
 
 Enjoy
