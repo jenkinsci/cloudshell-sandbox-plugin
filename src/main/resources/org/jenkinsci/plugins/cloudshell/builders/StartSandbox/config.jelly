@@ -18,14 +18,11 @@ limitations under the License.
 	<f:entry title="${%Blueprint Name}" field="blueprintName">
       <f:textbox  />
     </f:entry>
-    <f:entry title="${%Sandbox Name}" field="sandboxName">
-      <f:textbox  />
-    </f:entry>
     <f:entry title="${%Sandbox Duration in minuets}" field="sandboxDuration">
           <f:textbox/>
-          Newly created Sandbox Id will be available under $SANDBOX_ID environment variable
     </f:entry>
-        <f:entry title="${%Wait for setup to complete?}" field="waitForSetup">
-            <f:checkbox checked="true"/>
+        <f:entry title="${%Timeout if Sandbox unavailable}" field="maxWaitForSandboxAvailability">
+              <f:textbox default="10"/>
+                Newly created Sandbox Id will be available under $SANDBOX_ID environment variable
         </f:entry>
 </j:jelly>

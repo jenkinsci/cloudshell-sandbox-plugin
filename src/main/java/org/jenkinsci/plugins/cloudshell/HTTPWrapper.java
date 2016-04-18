@@ -8,7 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,27 +18,18 @@ import java.io.UnsupportedEncodingException;
 public class HTTPWrapper {
 
 
-    public class RestResponse
-    {
-        private String content;
-        private int exitCode;
-        private String message;
 
-        public RestResponse(String content, int exitCode, String message) {
-            this.content = content;
-            this.exitCode = exitCode;
-            this.message = message;
-        }
-    }
 
-    public static String ExecuteGet(String url, String token)
+    public static RestResponse ExecuteGet(String url, String token)
     {
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(url);
         request.addHeader("Authorization", "Basic " + token);
         HttpResponse response = null;
+        int responseCode = 0;
         try {
             response = client.execute(request);
+            responseCode = response.getStatusLine().getStatusCode();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,19 +43,20 @@ public class HTTPWrapper {
         String out = "";
         try {
             while ((line = rd.readLine()) != null) {
-                System.out.println(line);
                 out += line;
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return out;
+        return new RestResponse(out, responseCode);
+
     }
 
-    public static String ExecutePost(String url, String token, String name, String duration)
+    public static RestResponse ExecutePost(String url, String token, String name, String duration)
     {
         duration = "PT" + duration + "M";
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(url);
         request.addHeader("Authorization", "Basic " + token);
         request.setHeader("Content-type", "application/json");
@@ -76,8 +68,12 @@ public class HTTPWrapper {
         }
         request.setEntity(params);
         HttpResponse response = null;
+        int responseCode = 0;
+
         try {
             response = client.execute(request);
+            responseCode = response.getStatusLine().getStatusCode();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,18 +87,17 @@ public class HTTPWrapper {
         String out = "";
         try {
             while ((line = rd.readLine()) != null) {
-                System.out.println(line);
                 out += line;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return out;
+        return new RestResponse(out, responseCode);
     }
 
-    public static String InvokeLogin(String url, String user, String password, String domain) {
+    public static RestResponse InvokeLogin(String url, String user, String password, String domain) {
         url = url + "/Login";
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpClient httpClient = HttpClientBuilder.create().build();
         StringBuilder result = new StringBuilder();
         try {
             HttpPut putRequest = new HttpPut(url);
@@ -117,14 +112,16 @@ public class HTTPWrapper {
                 input = new StringEntity(keyArg.toString());
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-                return "success";
+                throw e;
             }
             putRequest.setEntity(input);
             HttpResponse response = httpClient.execute(putRequest);
+
             if (response.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Failed : HTTP error code : "
+                throw new RuntimeException("Failed to login: "
                         + response.getStatusLine().getStatusCode());
             }
+
             BufferedReader br = new BufferedReader(new InputStreamReader(
                     (response.getEntity().getContent())));
             String output;
@@ -136,6 +133,7 @@ public class HTTPWrapper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result.toString().replace("\"","");
+        String out =  result.toString().replace("\"","");
+        return new RestResponse(out,200);
     }
 }

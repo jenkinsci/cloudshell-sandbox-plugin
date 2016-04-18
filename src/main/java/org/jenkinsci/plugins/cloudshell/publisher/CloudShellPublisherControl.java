@@ -22,11 +22,8 @@ import java.util.List;
  */
 public class CloudShellPublisherControl extends Recorder implements Serializable {
 
-    public final boolean remove;
-
     @DataBoundConstructor
-    public CloudShellPublisherControl(boolean remove) {
-        this.remove = remove;
+    public CloudShellPublisherControl() {
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -45,7 +42,7 @@ public class CloudShellPublisherControl extends Recorder implements Serializable
         for (SandboxLaunchAction sandboxItem : sandboxLaunchActions) {
             for (String sandboxId : sandboxItem.getRunning()) {
                 try {
-                    new SandboxAPIProxy(sandboxItem.getServerDetails()).StopBluePrint(sandboxId,remove,listener);
+                    new SandboxAPIProxy(sandboxItem.getServerDetails()).StopBluePrint(sandboxId,true,listener);
                 } catch (SandboxAPIProxy.SandboxApiException e) {
                     e.printStackTrace();
                 }

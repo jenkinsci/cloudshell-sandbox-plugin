@@ -14,6 +14,8 @@
  */
 package org.jenkinsci.plugins.cloudshell.builders;
 
+import com.iwombat.foundation.uuid.UUID;
+import com.iwombat.util.GUIDUtil;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -28,50 +30,77 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class StartSandbox extends CloudShellBuildStep {
 
 	private final String blueprintName;
-	private final String sandboxName;
 	private final String sandboxDuration;
-	private final boolean waitForSetup;
+	private final int maxWaitForSandboxAvailability;
 
 	@DataBoundConstructor
-	public StartSandbox(String blueprintName, String sandboxName, String sandboxDuration, boolean waitForSetup) {
+	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability) {
 		this.blueprintName = blueprintName;
-		this.sandboxName = sandboxName;
 		this.sandboxDuration = sandboxDuration;
-		this.waitForSetup = waitForSetup;
+		this.maxWaitForSandboxAvailability = maxWaitForSandboxAvailability;
 	}
 
 	public String getBlueprintName() {
 		return blueprintName;
 	}
 
-	public String getSandboxName() {
-		return sandboxName;
-	}
-
 	public String getSandboxDuration() {
 		return sandboxDuration;
 	}
 
-	public boolean getSwaitForSetup() {
-		return waitForSetup;
+	public int getMaxWaitForSandboxAvailability() {
+		return maxWaitForSandboxAvailability;
 	}
 
-
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) throws SandboxAPIProxy.SandboxApiException {
-		return StartSandBox(build, launcher, listener, server);
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) throws SandboxAPIProxy.SandboxApiException, InterruptedException {
+        return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
 	}
+
+	private boolean TryToReserveWithTimeout(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CsServerDetails server,
+											long timeout_minutes) throws SandboxAPIProxy.SandboxApiException, InterruptedException {
+
+		long startTime = System.currentTimeMillis();
+
+		while ((System.currentTimeMillis()-startTime) <= timeout_minutes * 60 * 1000 ){
+
+			try {
+				return StartSandBox(build,launcher,listener,server);
+			}
+			catch (SandboxAPIProxy.ReserveBluePrintConflictException ce){
+				listener.getLogger().println("Waiting for sandbox to become available...");
+			}
+			catch (Exception e){
+				throw e;
+			}
+			Thread.sleep(30*1000);
+
+		}
+
+		return  false;
+	}
+
 
 	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException {
 		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
-		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, waitForSetup, listener);
-		build.addAction(new VariableInjectionAction("SANDBOX_ID",id));
-		SandboxLaunchAction launchAction = new SandboxLaunchAction(serverDetails);
-		build.addAction(launchAction);
-		launchAction.started(id);
+        String sandboxName = build.getFullDisplayName() + "_" + java.util.UUID.randomUUID().toString().substring(0,5);
+		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, true, listener);
+        listener.getLogger().println("Created Sandbox: " + sandboxName);
+        listener.getLogger().println("Sandbox Id: " + id);
+        addSandboxToBuildActions(build, serverDetails, id);
+        int maxSetup = Integer.parseInt(sandboxDuration)*60;
+        proxy.WaitForSetup(id,maxSetup,listener);
 		return true;
 	}
 
-	@Extension
+    private void addSandboxToBuildActions(AbstractBuild<?, ?> build, CsServerDetails serverDetails, String id) {
+        build.addAction(new VariableInjectionAction("SANDBOX_ID",id));
+        SandboxLaunchAction launchAction = new SandboxLaunchAction(serverDetails);
+        build.addAction(launchAction);
+        launchAction.started(id);
+    }
+
+
+    @Extension
 	public static final class startSandboxDescriptor extends CSBuildStepDescriptor {
 
 		public startSandboxDescriptor() {

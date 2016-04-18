@@ -51,44 +51,50 @@ public class SandboxAPIProxy {
         this.serverDetails=serverDetails;
     }
 
+    public String WaitForSetup(String sandBoxId, int waitForSetup, BuildListener listener)
+            throws SandboxApiException{
+
+        try {
+
+            listener.getLogger().println("Waiting for setup...");
+            WaitForSandBox(sandBoxId, "Ready", waitForSetup, listener);
+
+            return sandBoxId;
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+    }
+
     public String StartBluePrint(AbstractBuild<?,?> build, String bluePrintName, String sandBoxName, String duration, boolean waitForSetup, BuildListener listener)
             throws SandboxApiException
     {
-        String token = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain);
+        RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain);
         String url = GetBaseUrl() + "/v1/blueprints/"+ bluePrintName +"/start";
-
-        String result = HTTPWrapper.ExecutePost(url, token, sandBoxName, duration);
-        JSONObject j = JSONObject.fromObject(result);
+        RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), sandBoxName, duration);
+        JSONObject j = JSONObject.fromObject(result.getContent());
         if (j.containsKey("errorCategory")) {
             String message = j.get("message").toString();
             if (message.equals(BLUEPRINT_CONFLICT_ERROR)){
                 throw new ReserveBluePrintConflictException(bluePrintName,message);
             }
+            listener.getLogger().println("Error starting sandbox. Response was: " + result.getContent() + " HTTP Code: " + result.getHttpCode());
             throw new SandboxApiException(bluePrintName);
         }
-        try
-        {
-            listener.getLogger().println("SandBox Created: ");
-            String newSb = j.getString("id");
-            listener.getLogger().println(newSb);
-            if (waitForSetup)
-            {
-                WaitForSandBox(newSb, "Ready", 300);
-            }
-            return newSb;
-        }
-        catch (Exception e)
-        {
-            listener.getLogger().println(j);
-        }
-        return null;
+        String newSb = j.getString("id");
+        return newSb;
     }
 
     public void StopBluePrint(String sandboxId, boolean waitForComplete, BuildListener listener) throws SandboxApiException {
-        String token = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
+        RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
         String url = GetBaseUrl() + "/v1/sandboxes/" + sandboxId + "/stop";
-        String result = HTTPWrapper.ExecutePost(url, token, null, null);
-        JSONObject j = JSONObject.fromObject(result);
+        RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), null, null);
+       /* if (response.getHttpCode() != 200) {
+            throw new RuntimeException("Failed to stop: "
+                    + response.getHttpCode());
+        }*/
+        JSONObject j = JSONObject.fromObject(result.getContent());
         if (j.containsKey("errorCategory")) {
             throw new SandboxApiException("Failed to stop blueprint: " + j);
         }
@@ -97,7 +103,7 @@ public class SandboxAPIProxy {
         {
             if (waitForComplete)
             {
-                WaitForSandBox(sandboxId, "Ended", 300);
+                WaitForSandBox(sandboxId, "Ended", 300, listener);
             }
             listener.getLogger().println("SandBox Stopped: ");
             listener.getLogger().println(sandboxId);
@@ -113,7 +119,7 @@ public class SandboxAPIProxy {
         return SandboxDetails(sb).getString("state");
     }
 
-    private void WaitForSandBox(String sandboxId, String status, int timeoutSec) throws SandboxApiException {
+    private void WaitForSandBox(String sandboxId, String status, int timeoutSec, BuildListener listener) throws SandboxApiException {
         long startTime = System.currentTimeMillis();
 
         String sandboxStatus = GetSandBoxStatus(sandboxId);
@@ -121,6 +127,7 @@ public class SandboxAPIProxy {
         {
             if (sandboxStatus.equals("Error"))
             {
+                listener.getLogger().println("There was an error setting up the sandbox. Aborting");
                 throw new SandboxApiException("Sandbox status is: Error");
             }
             try {
@@ -128,15 +135,17 @@ public class SandboxAPIProxy {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            sandboxStatus = GetSandBoxStatus(sandboxId);
         }
     }
 
     private JSONObject SandboxDetails(String sb)
     {
-        String token = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
+        RestResponse response= HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
         String url = GetBaseUrl() + "/v1/sandboxes/" + sb;
-        String result = HTTPWrapper.ExecuteGet(url, token);
-        JSONObject j = JSONObject.fromObject(result);
+        RestResponse result = HTTPWrapper.ExecuteGet(url, response.getContent());
+
+        JSONObject j = JSONObject.fromObject(result.getContent());
 
         if (j.toString().contains("errorCategory")) {
             throw new RuntimeException("Failed to get sandbox details: " + j);
