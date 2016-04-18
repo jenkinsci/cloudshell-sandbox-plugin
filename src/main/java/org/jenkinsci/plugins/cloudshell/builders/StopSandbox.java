@@ -25,21 +25,27 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class StopSandbox extends CloudShellBuildStep {
 
-	private final String SbId;
+	private final String sandboxId;
+	private final boolean waitTillCompleted;
 
 	@DataBoundConstructor
-	public StopSandbox(String sbId) {
+	public StopSandbox(String sandboxId, boolean waitForComplete) {
 
-		SbId = sbId;
+		this.sandboxId = sandboxId;
+		this.waitTillCompleted = waitForComplete;
 	}
 
-	public String getSbId() {
-		return SbId;
+	public boolean getWaitTillCompleted() {
+		return waitTillCompleted;
 	}
 
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) {
+	public String getSandboxId() {
+		return sandboxId;
+	}
+
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException {
 		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
-		proxy.StopBluePrint(SbId, listener);
+		proxy.StopBluePrint(sandboxId, waitTillCompleted, listener);
 		return true;
 	}
 

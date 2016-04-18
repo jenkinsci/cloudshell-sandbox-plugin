@@ -15,14 +15,17 @@ limitations under the License.
 -->
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-	<f:entry title="${%Blueprint Name}" field="bpName">
+	<f:entry title="${%Blueprint Name}" field="blueprintName">
       <f:textbox  />
     </f:entry>
-    <f:entry title="${%Sandbox Name}" field="sbName">
+    <f:entry title="${%Sandbox Name}" field="sandboxName">
       <f:textbox  />
     </f:entry>
-    <f:entry title="${%Sandbox Duration}" field="sbDuration">
-          <f:textbox  />
+    <f:entry title="${%Sandbox Duration in minuets}" field="sandboxDuration">
+          <f:textbox/>
           Newly created Sandbox Id will be available under $SANDBOX_ID environment variable
     </f:entry>
+        <f:entry title="${%Wait for setup to complete?}" field="waitForSetup">
+            <f:checkbox checked="true"/>
+        </f:entry>
 </j:jelly>

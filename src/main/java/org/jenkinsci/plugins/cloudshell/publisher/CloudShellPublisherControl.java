@@ -44,7 +44,11 @@ public class CloudShellPublisherControl extends Recorder implements Serializable
 
         for (SandboxLaunchAction sandboxItem : sandboxLaunchActions) {
             for (String sandboxId : sandboxItem.getRunning()) {
-                new SandboxAPIProxy(sandboxItem.getServerDetails()).StopBluePrint(sandboxId,listener);
+                try {
+                    new SandboxAPIProxy(sandboxItem.getServerDetails()).StopBluePrint(sandboxId,remove,listener);
+                } catch (SandboxAPIProxy.SandboxApiException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return true;

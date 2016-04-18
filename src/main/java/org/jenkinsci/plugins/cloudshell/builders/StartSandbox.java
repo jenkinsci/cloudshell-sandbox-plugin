@@ -27,37 +27,43 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class StartSandbox extends CloudShellBuildStep {
 
-	private final String bpName;
-	private final String sbName;
-	private final String sbDuration;
+	private final String blueprintName;
+	private final String sandboxName;
+	private final String sandboxDuration;
+	private final boolean waitForSetup;
 
 	@DataBoundConstructor
-	public StartSandbox(String bpName, String sbName, String sbDuration) {
-		this.bpName = bpName;
-		this.sbName = sbName;
-		this.sbDuration = sbDuration;
+	public StartSandbox(String blueprintName, String sandboxName, String sandboxDuration, boolean waitForSetup) {
+		this.blueprintName = blueprintName;
+		this.sandboxName = sandboxName;
+		this.sandboxDuration = sandboxDuration;
+		this.waitForSetup = waitForSetup;
 	}
 
-	public String getBpName() {
-		return bpName;
+	public String getBlueprintName() {
+		return blueprintName;
 	}
 
-	public String getSbName() {
-		return sbName;
+	public String getSandboxName() {
+		return sandboxName;
 	}
 
-	public String getSbDuration() {
-		return sbDuration;
+	public String getSandboxDuration() {
+		return sandboxDuration;
+	}
+
+	public boolean getSwaitForSetup() {
+		return waitForSetup;
 	}
 
 
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) {
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) throws SandboxAPIProxy.SandboxApiException {
 		return StartSandBox(build, launcher, listener, server);
 	}
 
-	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails)  {
+	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException {
 		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
-		String id = proxy.StartBluePrint(build,bpName, sbName, sbDuration, listener);
+		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, waitForSetup, listener);
 		build.addAction(new VariableInjectionAction("SANDBOX_ID",id));
 		SandboxLaunchAction launchAction = new SandboxLaunchAction(serverDetails);
 		build.addAction(launchAction);
