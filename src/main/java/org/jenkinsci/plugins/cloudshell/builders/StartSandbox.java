@@ -27,6 +27,8 @@ import org.jenkinsci.plugins.cloudshell.VariableInjectionAction;
 import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import java.io.UnsupportedEncodingException;
+
 public class StartSandbox extends CloudShellBuildStep {
 
 	private final String blueprintName;
@@ -52,12 +54,12 @@ public class StartSandbox extends CloudShellBuildStep {
 		return maxWaitForSandboxAvailability;
 	}
 
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) throws SandboxAPIProxy.SandboxApiException, InterruptedException {
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) throws SandboxAPIProxy.SandboxApiException, InterruptedException, UnsupportedEncodingException {
         return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
 	}
 
 	private boolean TryToReserveWithTimeout(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CsServerDetails server,
-											long timeout_minutes) throws SandboxAPIProxy.SandboxApiException, InterruptedException {
+											long timeout_minutes) throws SandboxAPIProxy.SandboxApiException, InterruptedException, UnsupportedEncodingException {
 
 		long startTime = System.currentTimeMillis();
 
@@ -80,7 +82,7 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 
 
-	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException {
+	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException, UnsupportedEncodingException {
 		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
         String sandboxName = build.getFullDisplayName() + "_" + java.util.UUID.randomUUID().toString().substring(0,5);
 		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, true, listener);

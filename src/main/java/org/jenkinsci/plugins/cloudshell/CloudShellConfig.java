@@ -94,8 +94,7 @@ public class CloudShellConfig extends Builder {
                     formData.getString("serverAddress"),
                     formData.getString("user"),
                     formData.getString("pw"),
-					formData.getString("domain"),
-					formData.getInt("port")
+					formData.getString("domain")
                     );
             save();
             return super.configure(req,formData);
@@ -118,9 +117,6 @@ public class CloudShellConfig extends Builder {
         }
         public String getPw() {
             return server.pw;
-        }
-        public int getPort() {
-            return server.port;
         }
 		public String getDomain() {
 			return server.domain;

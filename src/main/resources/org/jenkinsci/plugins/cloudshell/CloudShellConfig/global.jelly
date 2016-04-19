@@ -13,8 +13,5 @@
         <f:entry title="Domain" field="domain">
             <f:textbox/>
         </f:entry>
-        <f:entry title="Server API Port" field="port">
-            <f:textbox default="82"/>
-        </f:entry>
   </f:section>
 </j:jelly>

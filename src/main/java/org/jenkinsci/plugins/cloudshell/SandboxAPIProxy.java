@@ -18,6 +18,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import net.sf.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 public class SandboxAPIProxy {
     public static final String BLUEPRINT_CONFLICT_ERROR = "Blueprint has conflicting resources";
     protected final CsServerDetails serverDetails;
@@ -44,7 +47,7 @@ public class SandboxAPIProxy {
 
     public SandboxAPIProxy(String serverAddress, String user, String pw, int port, String domain)
 	{
-        this.serverDetails=new CsServerDetails(serverAddress,user,pw, domain, port);
+        this.serverDetails=new CsServerDetails(serverAddress,user,pw, domain);
     }
 
     public SandboxAPIProxy(CsServerDetails serverDetails){
@@ -68,10 +71,9 @@ public class SandboxAPIProxy {
     }
 
     public String StartBluePrint(AbstractBuild<?,?> build, String bluePrintName, String sandBoxName, String duration, boolean waitForSetup, BuildListener listener)
-            throws SandboxApiException
-    {
+            throws SandboxApiException, UnsupportedEncodingException {
         RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain);
-        String url = GetBaseUrl() + "/v1/blueprints/"+ bluePrintName +"/start";
+        String url = GetBaseUrl() + "/v1/blueprints/"+ URLEncoder.encode(bluePrintName, "UTF-8") +"/start";
         RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), sandBoxName, duration);
         JSONObject j = JSONObject.fromObject(result.getContent());
         if (j.containsKey("errorCategory")) {
@@ -155,7 +157,7 @@ public class SandboxAPIProxy {
 
     private String GetBaseUrl()
     {
-        return "http://" + this.serverDetails.serverAddress + ":" + this.serverDetails.port + "/Api";
+        return this.serverDetails.serverAddress + "/Api";
     }
 
 }
