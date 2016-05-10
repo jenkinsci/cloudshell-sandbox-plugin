@@ -28,6 +28,9 @@ import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 public class StartSandbox extends CloudShellBuildStep {
 
@@ -54,12 +57,12 @@ public class StartSandbox extends CloudShellBuildStep {
 		return maxWaitForSandboxAvailability;
 	}
 
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) throws SandboxAPIProxy.SandboxApiException, InterruptedException, UnsupportedEncodingException {
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) throws SandboxAPIProxy.SandboxApiException, InterruptedException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
 	}
 
 	private boolean TryToReserveWithTimeout(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CsServerDetails server,
-											long timeout_minutes) throws SandboxAPIProxy.SandboxApiException, InterruptedException, UnsupportedEncodingException {
+											long timeout_minutes) throws SandboxAPIProxy.SandboxApiException, InterruptedException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
 		long startTime = System.currentTimeMillis();
 
@@ -82,7 +85,7 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 
 
-	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException, UnsupportedEncodingException {
+	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
         String sandboxName = build.getFullDisplayName() + "_" + java.util.UUID.randomUUID().toString().substring(0,5);
 		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, true, listener);

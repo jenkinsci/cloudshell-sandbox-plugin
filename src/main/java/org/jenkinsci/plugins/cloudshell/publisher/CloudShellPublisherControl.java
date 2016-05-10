@@ -13,6 +13,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -44,6 +47,12 @@ public class CloudShellPublisherControl extends Recorder implements Serializable
                 try {
                     new SandboxAPIProxy(sandboxItem.getServerDetails()).StopBluePrint(sandboxId,true,listener);
                 } catch (SandboxAPIProxy.SandboxApiException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (KeyStoreException e) {
+                    e.printStackTrace();
+                } catch (KeyManagementException e) {
                     e.printStackTrace();
                 }
             }

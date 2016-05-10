@@ -20,6 +20,9 @@ import net.sf.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 public class SandboxAPIProxy {
     public static final String BLUEPRINT_CONFLICT_ERROR = "Blueprint has conflicting resources";
@@ -55,7 +58,7 @@ public class SandboxAPIProxy {
     }
 
     public String WaitForSetup(String sandBoxId, int waitForSetup, BuildListener listener)
-            throws SandboxApiException{
+            throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
         try {
 
@@ -71,7 +74,7 @@ public class SandboxAPIProxy {
     }
 
     public String StartBluePrint(AbstractBuild<?,?> build, String bluePrintName, String sandBoxName, String duration, boolean waitForSetup, BuildListener listener)
-            throws SandboxApiException, UnsupportedEncodingException {
+            throws SandboxApiException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain);
         String url = GetBaseUrl() + "/v1/blueprints/"+ URLEncoder.encode(bluePrintName, "UTF-8") +"/start";
         RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), sandBoxName, duration);
@@ -88,7 +91,7 @@ public class SandboxAPIProxy {
         return newSb;
     }
 
-    public void StopBluePrint(String sandboxId, boolean waitForComplete, BuildListener listener) throws SandboxApiException {
+    public void StopBluePrint(String sandboxId, boolean waitForComplete, BuildListener listener) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
         String url = GetBaseUrl() + "/v1/sandboxes/" + sandboxId + "/stop";
         RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), null, null);
@@ -116,12 +119,11 @@ public class SandboxAPIProxy {
         }
     }
 
-    private String GetSandBoxStatus(String sb)
-    {
+    private String GetSandBoxStatus(String sb) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         return SandboxDetails(sb).getString("state");
     }
 
-    private void WaitForSandBox(String sandboxId, String status, int timeoutSec, BuildListener listener) throws SandboxApiException {
+    private void WaitForSandBox(String sandboxId, String status, int timeoutSec, BuildListener listener) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         long startTime = System.currentTimeMillis();
 
         String sandboxStatus = GetSandBoxStatus(sandboxId);
@@ -141,8 +143,7 @@ public class SandboxAPIProxy {
         }
     }
 
-    private JSONObject SandboxDetails(String sb)
-    {
+    private JSONObject SandboxDetails(String sb) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         RestResponse response= HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
         String url = GetBaseUrl() + "/v1/sandboxes/" + sb;
         RestResponse result = HTTPWrapper.ExecuteGet(url, response.getContent());
