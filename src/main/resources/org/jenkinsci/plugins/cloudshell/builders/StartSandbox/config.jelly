@@ -23,6 +23,6 @@ limitations under the License.
     </f:entry>
         <f:entry title="${%Timeout if Sandbox unavailable}" field="maxWaitForSandboxAvailability">
               <f:textbox default="10"/>
-                Newly created Sandbox Id will be available under $SANDBOX_ID environment variable
+                Newly created Sandbox Id will be available under $SANDBOX_ID environment variable. Sandbox information will be stored under $SANDBOX_DETAILS environment variable.
         </f:entry>
 </j:jelly>
