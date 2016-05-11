@@ -7,22 +7,27 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 public class HTTPWrapper {
 
 
 
-
-    public static RestResponse ExecuteGet(String url, String token)
-    {
-        HttpClient client = HttpClientBuilder.create().build();
+    public static RestResponse ExecuteGet(String url, String token, boolean IgnoreSSL) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        HttpClient client = CreateClient(IgnoreSSL);
         HttpGet request = new HttpGet(url);
         request.addHeader("Authorization", "Basic " + token);
         HttpResponse response = null;
@@ -53,10 +58,22 @@ public class HTTPWrapper {
 
     }
 
-    public static RestResponse ExecutePost(String url, String token, String name, String duration)
-    {
+    private static org.apache.http.client.HttpClient CreateClient(boolean IgnoreSSL) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        if (IgnoreSSL)
+        {
+            return HttpClients.custom()
+                    .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
+                                    .loadTrustMaterial(null, new TrustSelfSignedStrategy())
+                                    .build()
+                            )
+                    ).build();
+        }
+        return HttpClientBuilder.create().build();
+    }
+
+    public static RestResponse ExecutePost(String url, String token, String name, String duration, boolean IgnoreSSL) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         duration = "PT" + duration + "M";
-        HttpClient client = HttpClientBuilder.create().build();
+        HttpClient client = CreateClient(IgnoreSSL);
         HttpPost request = new HttpPost(url);
         request.addHeader("Authorization", "Basic " + token);
         request.setHeader("Content-type", "application/json");
@@ -95,9 +112,9 @@ public class HTTPWrapper {
         return new RestResponse(out, responseCode);
     }
 
-    public static RestResponse InvokeLogin(String url, String user, String password, String domain) {
+    public static RestResponse InvokeLogin(String url, String user, String password, String domain, boolean IgnoreSSL) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         url = url + "/Login";
-        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpClient client = CreateClient(IgnoreSSL);
         StringBuilder result = new StringBuilder();
         try {
             HttpPut putRequest = new HttpPut(url);
@@ -115,7 +132,7 @@ public class HTTPWrapper {
                 throw e;
             }
             putRequest.setEntity(input);
-            HttpResponse response = httpClient.execute(putRequest);
+            HttpResponse response = client.execute(putRequest);
 
             if (response.getStatusLine().getStatusCode() != 200) {
                 throw new RuntimeException("Failed to login: "
