@@ -91,14 +91,16 @@ public class StartSandbox extends CloudShellBuildStep {
 		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, true, serverDetails.ignoreSSL, listener);
         listener.getLogger().println("Created Sandbox: " + sandboxName);
         listener.getLogger().println("Sandbox Id: " + id);
-        addSandboxToBuildActions(build, serverDetails, id);
+		String sandboxDetails = proxy.GetSandBoxDetails(build, id, serverDetails.ignoreSSL, listener);
+        addSandboxToBuildActions(build, serverDetails, id, sandboxDetails);
         int maxSetup = Integer.parseInt(sandboxDuration)*60;
         proxy.WaitForSetup(id,maxSetup, serverDetails.ignoreSSL, listener);
 		return true;
 	}
 
-    private void addSandboxToBuildActions(AbstractBuild<?, ?> build, CsServerDetails serverDetails, String id) {
+    private void addSandboxToBuildActions(AbstractBuild<?, ?> build, CsServerDetails serverDetails, String id, String sandboxDetails) {
         build.addAction(new VariableInjectionAction("SANDBOX_ID",id));
+		build.addAction(new VariableInjectionAction("SANDBOX_DETAILS",sandboxDetails));
         SandboxLaunchAction launchAction = new SandboxLaunchAction(serverDetails);
         build.addAction(launchAction);
         launchAction.started(id);

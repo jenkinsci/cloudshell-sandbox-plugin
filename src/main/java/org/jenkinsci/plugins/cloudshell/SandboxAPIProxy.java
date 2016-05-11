@@ -73,6 +73,11 @@ public class SandboxAPIProxy {
         }
     }
 
+    public String GetSandBoxDetails(AbstractBuild<?,?> build, String sandboxId, boolean ignoreSSL, BuildListener listener)
+            throws SandboxApiException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        return SandboxDetails(sandboxId, ignoreSSL).toString();
+    }
+
     public String StartBluePrint(AbstractBuild<?,?> build, String bluePrintName, String sandBoxName, String duration, boolean waitForSetup, boolean ignoreSSL, BuildListener listener)
             throws SandboxApiException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain, ignoreSSL);
