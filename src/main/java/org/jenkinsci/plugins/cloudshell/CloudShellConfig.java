@@ -94,7 +94,8 @@ public class CloudShellConfig extends Builder {
                     formData.getString("serverAddress"),
                     formData.getString("user"),
                     formData.getString("pw"),
-					formData.getString("domain")
+					formData.getString("domain"),
+                    Boolean.parseBoolean(formData.getString("ignoreSSL"))
                     );
             save();
             return super.configure(req,formData);
@@ -121,6 +122,9 @@ public class CloudShellConfig extends Builder {
 		public String getDomain() {
 			return server.domain;
 		}
+        public boolean getIgnoreSSL() {
+            return server.ignoreSSL;
+        }
         public CsServerDetails getServer() {return server;}
 
 	}

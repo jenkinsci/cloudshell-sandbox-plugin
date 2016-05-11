@@ -48,22 +48,22 @@ public class SandboxAPIProxy {
         }
     }
 
-    public SandboxAPIProxy(String serverAddress, String user, String pw, int port, String domain)
+    public SandboxAPIProxy(String serverAddress, String user, String pw, int port, String domain, boolean ignoreSSL)
 	{
-        this.serverDetails=new CsServerDetails(serverAddress,user,pw, domain);
+        this.serverDetails=new CsServerDetails(serverAddress,user,pw, domain, ignoreSSL);
     }
 
     public SandboxAPIProxy(CsServerDetails serverDetails){
         this.serverDetails=serverDetails;
     }
 
-    public String WaitForSetup(String sandBoxId, int waitForSetup, BuildListener listener)
+    public String WaitForSetup(String sandBoxId, int waitForSetup, boolean ignoreSSL, BuildListener listener)
             throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
         try {
 
             listener.getLogger().println("Waiting for setup...");
-            WaitForSandBox(sandBoxId, "Ready", waitForSetup, listener);
+            WaitForSandBox(sandBoxId, "Ready", waitForSetup, ignoreSSL, listener);
 
             return sandBoxId;
         }
@@ -73,11 +73,11 @@ public class SandboxAPIProxy {
         }
     }
 
-    public String StartBluePrint(AbstractBuild<?,?> build, String bluePrintName, String sandBoxName, String duration, boolean waitForSetup, BuildListener listener)
+    public String StartBluePrint(AbstractBuild<?,?> build, String bluePrintName, String sandBoxName, String duration, boolean waitForSetup, boolean ignoreSSL, BuildListener listener)
             throws SandboxApiException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain);
+        RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain, ignoreSSL);
         String url = GetBaseUrl() + "/v1/blueprints/"+ URLEncoder.encode(bluePrintName, "UTF-8") +"/start";
-        RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), sandBoxName, duration);
+        RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), sandBoxName, duration, ignoreSSL);
         JSONObject j = JSONObject.fromObject(result.getContent());
         if (j.containsKey("errorCategory")) {
             String message = j.get("message").toString();
@@ -91,10 +91,10 @@ public class SandboxAPIProxy {
         return newSb;
     }
 
-    public void StopBluePrint(String sandboxId, boolean waitForComplete, BuildListener listener) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
+    public void StopBluePrint(String sandboxId, boolean waitForComplete, boolean ignoreSSL, BuildListener listener) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global",ignoreSSL);
         String url = GetBaseUrl() + "/v1/sandboxes/" + sandboxId + "/stop";
-        RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), null, null);
+        RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), null, null, ignoreSSL);
        /* if (response.getHttpCode() != 200) {
             throw new RuntimeException("Failed to stop: "
                     + response.getHttpCode());
@@ -108,7 +108,7 @@ public class SandboxAPIProxy {
         {
             if (waitForComplete)
             {
-                WaitForSandBox(sandboxId, "Ended", 300, listener);
+                WaitForSandBox(sandboxId, "Ended", 300, ignoreSSL, listener);
             }
             listener.getLogger().println("SandBox Stopped: ");
             listener.getLogger().println(sandboxId);
@@ -119,14 +119,14 @@ public class SandboxAPIProxy {
         }
     }
 
-    private String GetSandBoxStatus(String sb) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        return SandboxDetails(sb).getString("state");
+    private String GetSandBoxStatus(String sb, boolean ignoreSSL) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        return SandboxDetails(sb, ignoreSSL).getString("state");
     }
 
-    private void WaitForSandBox(String sandboxId, String status, int timeoutSec, BuildListener listener) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    private void WaitForSandBox(String sandboxId, String status, int timeoutSec, boolean ignoreSSL, BuildListener listener) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         long startTime = System.currentTimeMillis();
 
-        String sandboxStatus = GetSandBoxStatus(sandboxId);
+        String sandboxStatus = GetSandBoxStatus(sandboxId, ignoreSSL);
         while (!sandboxStatus.equals(status) && (System.currentTimeMillis()-startTime) < timeoutSec*1000)
         {
             if (sandboxStatus.equals("Error"))
@@ -139,14 +139,14 @@ public class SandboxAPIProxy {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            sandboxStatus = GetSandBoxStatus(sandboxId);
+            sandboxStatus = GetSandBoxStatus(sandboxId, ignoreSSL);
         }
     }
 
-    private JSONObject SandboxDetails(String sb) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        RestResponse response= HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global");
+    private JSONObject SandboxDetails(String sb, boolean ignoreSSL) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        RestResponse response= HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global", ignoreSSL);
         String url = GetBaseUrl() + "/v1/sandboxes/" + sb;
-        RestResponse result = HTTPWrapper.ExecuteGet(url, response.getContent());
+        RestResponse result = HTTPWrapper.ExecuteGet(url, response.getContent(), ignoreSSL);
 
         JSONObject j = JSONObject.fromObject(result.getContent());
 

@@ -7,6 +7,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import org.jenkinsci.plugins.cloudshell.CsServerDetails;
 import org.jenkinsci.plugins.cloudshell.SandboxAPIProxy;
 import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -45,7 +46,8 @@ public class CloudShellPublisherControl extends Recorder implements Serializable
         for (SandboxLaunchAction sandboxItem : sandboxLaunchActions) {
             for (String sandboxId : sandboxItem.getRunning()) {
                 try {
-                    new SandboxAPIProxy(sandboxItem.getServerDetails()).StopBluePrint(sandboxId,true,listener);
+                    CsServerDetails serverDetails = sandboxItem.getServerDetails();
+                    new SandboxAPIProxy(serverDetails).StopBluePrint(sandboxId,true, serverDetails.ignoreSSL, listener);
                 } catch (SandboxAPIProxy.SandboxApiException e) {
                     e.printStackTrace();
                 } catch (NoSuchAlgorithmException e) {

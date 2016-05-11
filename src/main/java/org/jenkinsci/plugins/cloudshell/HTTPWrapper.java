@@ -26,13 +26,8 @@ public class HTTPWrapper {
 
 
 
-    public static RestResponse ExecuteGet(String url, String token) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
-        HttpClient client = HttpClients.custom()
-                .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
-                                .loadTrustMaterial(null, new TrustSelfSignedStrategy())
-                                .build()
-                        )
-                ).build();
+    public static RestResponse ExecuteGet(String url, String token, boolean IgnoreSSL) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        HttpClient client = CreateClient(IgnoreSSL);
         HttpGet request = new HttpGet(url);
         request.addHeader("Authorization", "Basic " + token);
         HttpResponse response = null;
@@ -63,14 +58,22 @@ public class HTTPWrapper {
 
     }
 
-    public static RestResponse ExecutePost(String url, String token, String name, String duration) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    private static org.apache.http.client.HttpClient CreateClient(boolean IgnoreSSL) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        if (IgnoreSSL)
+        {
+            return HttpClients.custom()
+                    .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
+                                    .loadTrustMaterial(null, new TrustSelfSignedStrategy())
+                                    .build()
+                            )
+                    ).build();
+        }
+        return HttpClientBuilder.create().build();
+    }
+
+    public static RestResponse ExecutePost(String url, String token, String name, String duration, boolean IgnoreSSL) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         duration = "PT" + duration + "M";
-        HttpClient client = HttpClients.custom()
-                .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
-                                .loadTrustMaterial(null, new TrustSelfSignedStrategy())
-                                .build()
-                        )
-                ).build();
+        HttpClient client = CreateClient(IgnoreSSL);
         HttpPost request = new HttpPost(url);
         request.addHeader("Authorization", "Basic " + token);
         request.setHeader("Content-type", "application/json");
@@ -109,14 +112,9 @@ public class HTTPWrapper {
         return new RestResponse(out, responseCode);
     }
 
-    public static RestResponse InvokeLogin(String url, String user, String password, String domain) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    public static RestResponse InvokeLogin(String url, String user, String password, String domain, boolean IgnoreSSL) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         url = url + "/Login";
-        HttpClient client = HttpClients.custom()
-                .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
-                                .loadTrustMaterial(null, new TrustSelfSignedStrategy())
-                                .build()
-                        )
-                ).build();
+        HttpClient client = CreateClient(IgnoreSSL);
         StringBuilder result = new StringBuilder();
         try {
             HttpPut putRequest = new HttpPut(url);

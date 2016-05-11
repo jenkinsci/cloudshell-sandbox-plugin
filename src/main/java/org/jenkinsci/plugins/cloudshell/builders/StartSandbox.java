@@ -88,12 +88,12 @@ public class StartSandbox extends CloudShellBuildStep {
 	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
         String sandboxName = build.getFullDisplayName() + "_" + java.util.UUID.randomUUID().toString().substring(0,5);
-		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, true, listener);
+		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, true, serverDetails.ignoreSSL, listener);
         listener.getLogger().println("Created Sandbox: " + sandboxName);
         listener.getLogger().println("Sandbox Id: " + id);
         addSandboxToBuildActions(build, serverDetails, id);
         int maxSetup = Integer.parseInt(sandboxDuration)*60;
-        proxy.WaitForSetup(id,maxSetup,listener);
+        proxy.WaitForSetup(id,maxSetup, serverDetails.ignoreSSL, listener);
 		return true;
 	}
 
