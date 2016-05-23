@@ -149,7 +149,7 @@ public class SandboxAPIProxy {
     }
 
     private JSONObject SandboxDetails(String sb, boolean ignoreSSL) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        RestResponse response= HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global", ignoreSSL);
+        RestResponse response= HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain, ignoreSSL);
         String url = GetBaseUrl() + "/v1/sandboxes/" + sb;
         RestResponse result = HTTPWrapper.ExecuteGet(url, response.getContent(), ignoreSSL);
 
