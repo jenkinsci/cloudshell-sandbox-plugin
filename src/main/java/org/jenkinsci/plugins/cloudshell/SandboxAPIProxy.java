@@ -97,7 +97,7 @@ public class SandboxAPIProxy {
     }
 
     public void StopBluePrint(String sandboxId, boolean waitForComplete, boolean ignoreSSL, BuildListener listener) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, "Global",ignoreSSL);
+        RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain,ignoreSSL);
         String url = GetBaseUrl() + "/v1/sandboxes/" + sandboxId + "/stop";
         RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), null, null, ignoreSSL);
        /* if (response.getHttpCode() != 200) {
