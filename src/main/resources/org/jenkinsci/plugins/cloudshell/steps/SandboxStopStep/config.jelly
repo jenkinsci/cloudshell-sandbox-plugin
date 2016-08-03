@@ -25,10 +25,7 @@ THE SOFTWARE.
 
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-    <f:entry field="name" title="Name">
-        <f:textbox />
-    </f:entry>
-    <f:entry field="duration" title="Duration">
+    <f:entry field="reservationId" title="Reservation Id">
         <f:textbox />
     </f:entry>
 </j:jelly>

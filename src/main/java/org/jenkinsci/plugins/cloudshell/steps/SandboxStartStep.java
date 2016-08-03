@@ -24,55 +24,50 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
+import hudson.DescriptorExtensionList;
 import hudson.Extension;
+import hudson.model.BuildListener;
+import hudson.model.Descriptor;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep;
+import org.jenkinsci.plugins.cloudshell.CloudShellConfig;
+import org.jenkinsci.plugins.cloudshell.CsServerDetails;
+import org.jenkinsci.plugins.cloudshell.SandboxAPIProxy;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
 
-/**
- * Simple email sender step.
- *
- * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
- */
 public class SandboxStartStep extends AbstractStepImpl {
 
-    public final String subject;
+    public final String name;
 
-    public final String body;
+    public final int duration;
 
     @DataBoundConstructor
-    public SandboxStartStep(@Nonnull String subject, @Nonnull String body) {
-        this.subject = subject;
-        this.body = body;
+    public SandboxStartStep(@Nonnull String name, @Nonnull int duration) {
+        this.name = name;
+        this.duration = duration;
     }
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(MailStepExecution.class);
+            super(SandboxStartStepExecution.class);
         }
 
         @Override public String getFunctionName() {
-            return "Tomer";
+            return "startSandbox";
         }
 
         @Override public String getDisplayName() {
-            return "tomer";
+            return "starts a cloudshell sandbox";
         }
     }
 
-    /**
-     * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
-     */
-    public static class MailStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
-
-        private static final long serialVersionUID = 1L;
+    public static class SandboxStartStepExecution extends AbstractSynchronousStepExecution<String> {
 
         @Inject
         private transient SandboxStartStep step;
@@ -81,9 +76,17 @@ public class SandboxStartStep extends AbstractStepImpl {
         private transient TaskListener listener;
 
         @Override
-        protected Void run() throws Exception {
-            listener.getLogger().println("CloudSehll!");
-            return null;
+        protected String run() throws Exception {
+            listener.getLogger().println("CloudShell Starting!");
+            CloudShellConfig.DescriptorImpl descriptorImpl =
+                    (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
+            CsServerDetails server = descriptorImpl.getServer();
+            SandboxAPIProxy sandboxAPIProxy = new SandboxAPIProxy(server);
+            String start = sandboxAPIProxy.Start(step.name, "Jenkins", String.valueOf(step.duration), true, null);
+            listener.getLogger().println("CloudShell Started: " + start);
+            return start;
         }
+
+        private static final long serialVersionUID = 1L;
     }
 }

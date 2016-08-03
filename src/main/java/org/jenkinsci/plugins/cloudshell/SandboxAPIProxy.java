@@ -80,6 +80,10 @@ public class SandboxAPIProxy {
 
     public String StartBluePrint(AbstractBuild<?,?> build, String bluePrintName, String sandBoxName, String duration, boolean waitForSetup, boolean ignoreSSL, BuildListener listener)
             throws SandboxApiException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        return Start(bluePrintName, sandBoxName, duration, ignoreSSL, listener);
+    }
+
+    public String Start(String bluePrintName, String sandBoxName, String duration, boolean ignoreSSL, BuildListener listener) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException, UnsupportedEncodingException, SandboxApiException {
         RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain, ignoreSSL);
         String url = GetBaseUrl() + "/v1/blueprints/"+ URLEncoder.encode(bluePrintName, "UTF-8") +"/start";
         RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), sandBoxName, duration, ignoreSSL);
@@ -97,6 +101,10 @@ public class SandboxAPIProxy {
     }
 
     public void StopBluePrint(String sandboxId, boolean waitForComplete, boolean ignoreSSL, BuildListener listener) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        Stop(sandboxId, waitForComplete, ignoreSSL, listener);
+    }
+
+    public void Stop(String sandboxId, boolean waitForComplete, boolean ignoreSSL, BuildListener listener) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException, SandboxApiException {
         RestResponse response = HTTPWrapper.InvokeLogin(GetBaseUrl(), this.serverDetails.user, this.serverDetails.pw, this.serverDetails.domain,ignoreSSL);
         String url = GetBaseUrl() + "/v1/sandboxes/" + sandboxId + "/stop";
         RestResponse result = HTTPWrapper.ExecutePost(url, response.getContent(), null, null, ignoreSSL);
@@ -115,8 +123,11 @@ public class SandboxAPIProxy {
             {
                 WaitForSandBox(sandboxId, "Ended", 300, ignoreSSL, listener);
             }
-            listener.getLogger().println("SandBox Stopped: ");
-            listener.getLogger().println(sandboxId);
+            if (listener != null)
+            {
+                listener.getLogger().println("SandBox Stopped: ");
+                listener.getLogger().println(sandboxId);
+            }
         }
         catch (Exception e)
         {

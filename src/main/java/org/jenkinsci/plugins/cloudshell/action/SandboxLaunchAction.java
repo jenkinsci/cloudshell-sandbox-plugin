@@ -31,6 +31,7 @@ public class SandboxLaunchAction implements Action, Serializable, Cloneable{
     public CsServerDetails getServerDetails(){
         return this.serverDetails;
     }
+
     public void started(String sandboxId) {
         runningSandboxes.add( sandboxId );
     }

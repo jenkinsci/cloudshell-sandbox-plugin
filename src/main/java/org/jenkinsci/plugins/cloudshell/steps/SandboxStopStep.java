@@ -26,48 +26,41 @@ package org.jenkinsci.plugins.cloudshell.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.cloudshell.CloudShellConfig;
+import org.jenkinsci.plugins.cloudshell.CsServerDetails;
+import org.jenkinsci.plugins.cloudshell.SandboxAPIProxy;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
 
-/**
- * Simple email sender step.
- *
- * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
- */
 public class SandboxStopStep extends AbstractStepImpl {
 
-    public final String name;
-
-    public final int duration;
+    public final String reservationId;
 
     @DataBoundConstructor
-    public SandboxStopStep(@Nonnull String name, @Nonnull int duration) {
-        this.name = name;
-        this.duration = duration;
+    public SandboxStopStep(@Nonnull String reservationId) {
+        this.reservationId = reservationId;
     }
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(SandboxStartStepExecution.class);
+            super(SandboxStopStepExecution.class);
         }
 
         @Override public String getFunctionName() {
-            return "StartSandBox";
+            return "stopSandbox";
         }
 
         @Override public String getDisplayName() {
-            return "starts a cloudshell sandbox";
+            return "stops a cloudshell sandbox";
         }
     }
 
-    public static class SandboxStartStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
+    public static class SandboxStopStepExecution extends AbstractSynchronousStepExecution<Void> {
 
         private static final long serialVersionUID = 1L;
 
@@ -79,7 +72,12 @@ public class SandboxStopStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            listener.getLogger().println("CloudSehll!");
+            listener.getLogger().println("CloudShell Stop Starting!");
+            CloudShellConfig.DescriptorImpl descriptorImpl =
+                    (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
+            CsServerDetails server = descriptorImpl.getServer();
+            SandboxAPIProxy sandboxAPIProxy = new SandboxAPIProxy(server);
+            sandboxAPIProxy.Stop(step.reservationId, true, true, null);
             return null;
         }
     }
