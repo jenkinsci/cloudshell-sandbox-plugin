@@ -13,7 +13,7 @@
  *   limitations under the License.
  */
 package org.jenkinsci.plugins.cloudshell;
-
+import com.quali.cloudshell.QsServerDetails;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.Launcher;
@@ -46,7 +46,7 @@ public class CloudShellConfig extends Builder {
 
 	@Override
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener)  {
-		CsServerDetails serverDetails = getDescriptor().getServer();
+		QsServerDetails serverDetails = getDescriptor().getServer();
         try
         {
             return buildStep.perform(build, launcher, listener, serverDetails);
@@ -65,7 +65,7 @@ public class CloudShellConfig extends Builder {
 	@Extension
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        private CsServerDetails server;
+        private QsServerDetails server;
 
         public DescriptorImpl() {
             load();
@@ -90,7 +90,7 @@ public class CloudShellConfig extends Builder {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            server = new CsServerDetails(
+            server = new QsServerDetails(
                     formData.getString("serverAddress"),
                     formData.getString("user"),
                     formData.getString("pw"),
@@ -105,10 +105,6 @@ public class CloudShellConfig extends Builder {
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
 			return true;
 		}
-
-//        public String getServerAddress() {
-//            return server.serverAddress;
-//        }
 
 		public String getServerAddress() {
 	return server.serverAddress;
@@ -125,7 +121,7 @@ public class CloudShellConfig extends Builder {
         public boolean getIgnoreSSL() {
             return server.ignoreSSL;
         }
-        public CsServerDetails getServer() {return server;}
+        public QsServerDetails getServer() {return server;}
 
 	}
 }

@@ -1,14 +1,18 @@
 package org.jenkinsci.plugins.cloudshell.publisher;
 
+import com.quali.cloudshell.QsExceptions.SandboxApiException;
+import com.quali.cloudshell.QsServerDetails;
+import com.quali.cloudshell.SandboxApiGateway;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import org.jenkinsci.plugins.cloudshell.CsServerDetails;
-import org.jenkinsci.plugins.cloudshell.SandboxAPIProxy;
+import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
 import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -42,19 +46,20 @@ public class CloudShellPublisherControl extends Recorder implements Serializable
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         List<SandboxLaunchAction> sandboxLaunchActions = build.getActions(SandboxLaunchAction.class);
+        QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
 
         for (SandboxLaunchAction sandboxItem : sandboxLaunchActions) {
             for (String sandboxId : sandboxItem.getRunning()) {
                 try {
-                    CsServerDetails serverDetails = sandboxItem.getServerDetails();
-                    new SandboxAPIProxy(serverDetails).StopBluePrint(sandboxId,true, serverDetails.ignoreSSL, listener);
-                } catch (SandboxAPIProxy.SandboxApiException e) {
-                    e.printStackTrace();
+                    QsServerDetails serverDetails = sandboxItem.getServerDetails();
+                    new SandboxApiGateway(logger, serverDetails).StopSandbox(sandboxId, true);
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 } catch (KeyStoreException e) {
                     e.printStackTrace();
                 } catch (KeyManagementException e) {
+                    e.printStackTrace();
+                } catch (SandboxApiException e) {
                     e.printStackTrace();
                 }
             }
