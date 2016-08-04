@@ -14,15 +14,16 @@
  */
 package org.jenkinsci.plugins.cloudshell.builders;
 
-import com.iwombat.foundation.uuid.UUID;
-import com.iwombat.util.GUIDUtil;
+import com.quali.cloudshell.QsExceptions.ReserveBluePrintConflictException;
+import com.quali.cloudshell.QsExceptions.SandboxApiException;
+import com.quali.cloudshell.QsServerDetails;
+import com.quali.cloudshell.SandboxApiGateway;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep;
-import org.jenkinsci.plugins.cloudshell.CsServerDetails;
-import org.jenkinsci.plugins.cloudshell.SandboxAPIProxy;
+import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
 import org.jenkinsci.plugins.cloudshell.VariableInjectionAction;
 import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -37,6 +38,7 @@ public class StartSandbox extends CloudShellBuildStep {
 	private final String blueprintName;
 	private final String sandboxDuration;
 	private final int maxWaitForSandboxAvailability;
+	private QsJenkinsTaskLogger logger;
 
 	@DataBoundConstructor
 	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability) {
@@ -57,21 +59,21 @@ public class StartSandbox extends CloudShellBuildStep {
 		return maxWaitForSandboxAvailability;
 	}
 
-	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails server) throws SandboxAPIProxy.SandboxApiException, InterruptedException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
+	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
+		logger = new QsJenkinsTaskLogger(listener);
+		return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
 	}
 
-	private boolean TryToReserveWithTimeout(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CsServerDetails server,
-											long timeout_minutes) throws SandboxAPIProxy.SandboxApiException, InterruptedException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+	private boolean TryToReserveWithTimeout(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, QsServerDetails server,
+											long timeout_minutes) throws Exception {
 
 		long startTime = System.currentTimeMillis();
-
 		while ((System.currentTimeMillis()-startTime) <= timeout_minutes * 60 * 1000 ){
 
 			try {
 				return StartSandBox(build,launcher,listener,server);
 			}
-			catch (SandboxAPIProxy.ReserveBluePrintConflictException ce){
+			catch (ReserveBluePrintConflictException ce){
 				listener.getLogger().println("Waiting for sandbox to become available...");
 			}
 			catch (Exception e){
@@ -85,20 +87,15 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 
 
-	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, CsServerDetails serverDetails) throws SandboxAPIProxy.SandboxApiException, UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-		SandboxAPIProxy proxy = new SandboxAPIProxy(serverDetails);
-        String sandboxName = build.getFullDisplayName() + "_" + java.util.UUID.randomUUID().toString().substring(0,5);
-		String id = proxy.StartBluePrint(build, blueprintName, sandboxName, sandboxDuration, true, serverDetails.ignoreSSL, listener);
-        listener.getLogger().println("Created Sandbox: " + sandboxName);
-        listener.getLogger().println("Sandbox Id: " + id);
-		String sandboxDetails = proxy.GetSandBoxDetails(build, id, serverDetails.ignoreSSL, listener);
-        addSandboxToBuildActions(build, serverDetails, id, sandboxDetails);
-        int maxSetup = Integer.parseInt(sandboxDuration)*60;
-        proxy.WaitForSetup(id,maxSetup, serverDetails.ignoreSSL, listener);
+	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
+		SandboxApiGateway gateway = new SandboxApiGateway(logger, qsServerDetails);
+        String sandboxId = gateway.startBlueprint(blueprintName, Integer.parseInt(sandboxDuration), true, null);
+        String sandboxDetails = gateway.GetSandboxDetails(sandboxId);
+        addSandboxToBuildActions(build, qsServerDetails, sandboxId, sandboxDetails);
 		return true;
 	}
 
-    private void addSandboxToBuildActions(AbstractBuild<?, ?> build, CsServerDetails serverDetails, String id, String sandboxDetails) {
+    private void addSandboxToBuildActions(AbstractBuild<?, ?> build, QsServerDetails serverDetails, String id, String sandboxDetails) {
         build.addAction(new VariableInjectionAction("SANDBOX_ID",id));
 		build.addAction(new VariableInjectionAction("SANDBOX_DETAILS",sandboxDetails));
         SandboxLaunchAction launchAction = new SandboxLaunchAction(serverDetails);
