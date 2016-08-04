@@ -18,6 +18,9 @@
 
 ![Alt text](Pics/mainsetting.png?raw=true)
 
+### Pipeline support (Workflow) - New!
+![Alt text](Pics/pipeline.png?raw=true)
+
 ### Adding build steps
 Use a pre-scm step to start a sandbox and a post-build step for stopping running sandboxes.
 
