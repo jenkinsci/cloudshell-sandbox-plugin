@@ -1,6 +1,7 @@
 # Sandbox-Jenkins-Plugin
 
 [![Stories in Ready](https://badge.waffle.io/QualiSystems/Sandbox-Jenkins-Plugin.svg?label=ready&title=Ready)](http://waffle.io/QualiSystems/Sandbox-Jenkins-Plugin)
+[![Dependency Status](https://dependencyci.com/github/QualiSystems/Sandbox-Jenkins-Plugin/badge)](https://dependencyci.com/github/QualiSystems/Sandbox-Jenkins-Plugin)
 
 ## Installation
 1) Download the hpi package from the releases tab
