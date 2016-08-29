@@ -26,7 +26,7 @@ package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
 import com.quali.cloudshell.QsExceptions.SandboxApiException;
-import hudson.*;
+import hudson.Extension;
 import hudson.model.TaskListener;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.steps.*;
@@ -34,12 +34,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SandboxStep extends AbstractStepImpl {
 
@@ -76,8 +74,10 @@ public class SandboxStep extends AbstractStepImpl {
         @Override
         public boolean start() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-            getContext().newBodyInvoker().
-                    withContext(CreateSandbox(stepsCommon)).
+
+            StepContext context = getContext();
+            context.newBodyInvoker().
+                    withContext(CreateSandbox(stepsCommon, context)).
                     withCallback(new Callback(sandboxId, listener)).
                     start();
             return false;
@@ -85,17 +85,18 @@ public class SandboxStep extends AbstractStepImpl {
 
         @Override
         public void stop(@Nonnull Throwable throwable) throws Exception {
+            //TODO: Handle unexpected stop
             listener.getLogger().println("STOPINGGGG!");
         }
 
-        private boolean CreateSandbox(StepsCommon stepsCommon) throws
+        private boolean CreateSandbox(StepsCommon stepsCommon, StepContext context) throws
                 SandboxApiException,
                 NoSuchAlgorithmException,
                 KeyStoreException,
                 KeyManagementException,
-                UnsupportedEncodingException {
-            //TODO: send build name
-            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, null);
+                IOException, InterruptedException {
+
+            stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context);
             return false;
         }
 
