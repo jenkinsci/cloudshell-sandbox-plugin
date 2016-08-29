@@ -20,7 +20,12 @@
 ![Alt text](Pics/mainsetting.png?raw=true)
 
 ### Pipeline support (Workflow) - New!
+Use the "startSandbox" & "stopSandbox" to control CloudShell sandboxes during your pipeline flow
 ![Alt text](Pics/pipeline.png?raw=true)
+
+### Pipeline Scope Example:
+Use the "WithSandbox" scope to control CloudShell sandboxes for list specific actions in your pipeline flow
+![Alt text](Pics/PipelineScope.png?raw=true)
 
 ### Adding build steps
 Use a pre-scm step to start a sandbox and a post-build step for stopping running sandboxes.
