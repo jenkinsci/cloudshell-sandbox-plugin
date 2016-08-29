@@ -22,8 +22,7 @@ public class StepsCommon {
         QsServerDetails server = descriptorImpl.getServer();
         QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
         SandboxApiGateway gateway = new SandboxApiGateway(logger, server);
-        String sandboxName = buildName + "_" + java.util.UUID.randomUUID().toString().substring(0, 5);;
-        String sandboxId = gateway.startBlueprint(name, duration, true, sandboxName);
+        String sandboxId = gateway.startBlueprint(name, duration, true, buildName);
         return sandboxId;
     }
 
