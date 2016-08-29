@@ -1,14 +1,12 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
-import com.quali.cloudshell.QsServerDetails;
-import com.quali.cloudshell.SandboxApiGateway;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.cloudshell.CloudShellConfig;
-import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -16,14 +14,14 @@ import javax.annotation.Nonnull;
 public class SandboxStartStep extends AbstractStepImpl {
 
     public final String name;
-
     public final int duration;
 
     @DataBoundConstructor
-    public SandboxStartStep(@Nonnull String name, @Nonnull int duration) {
+    public SandboxStartStep(@Nonnull String name, @Nonnull int maxDuration) {
         this.name = name;
-        this.duration = duration;
+        this.duration = maxDuration;
     }
+
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
@@ -50,14 +48,9 @@ public class SandboxStartStep extends AbstractStepImpl {
 
         @Override
         protected String run() throws Exception {
-            listener.getLogger().println("CloudShell Starting!");
-            CloudShellConfig.DescriptorImpl descriptorImpl =
-                    (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
-            QsServerDetails server = descriptorImpl.getServer();
-            QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
-            SandboxApiGateway gateway = new SandboxApiGateway(logger, server);
-            String sandboxId = gateway.startBlueprint(step.name, step.duration, true, null);
-            return sandboxId;
+            StepsCommon stepsCommon = new StepsCommon();
+            //TODO: send build name
+            return stepsCommon.StartSandbox(listener, step.name, step.duration, null);
         }
 
         private static final long serialVersionUID = 1L;

@@ -50,14 +50,8 @@ public class SandboxStopStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            listener.getLogger().println("CloudShell Stop Starting!");
-            CloudShellConfig.DescriptorImpl descriptorImpl =
-                    (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
-            QsServerDetails server = descriptorImpl.getServer();
-
-            QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
-            SandboxApiGateway gateway = new SandboxApiGateway(logger, server);
-            gateway.StopSandbox(step.reservationId, true);
+            StepsCommon stepsCommon = new StepsCommon();
+            stepsCommon.StopSandbox(listener, step.reservationId);
             return null;
         }
     }

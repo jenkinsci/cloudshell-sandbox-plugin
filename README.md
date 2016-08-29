@@ -15,7 +15,7 @@
 ## Configuring CloudShell in Jenkins
 1) Navigate to the main Jenkins settings page
 
-2) Fill all fields under "cloudshell configuraiton" section.
+2) Fill all fields under "cloudshell configuration" section.
 
 ![Alt text](Pics/mainsetting.png?raw=true)
 
