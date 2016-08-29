@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
 import com.quali.cloudshell.QsExceptions.SandboxApiException;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import net.sf.json.JSONObject;
@@ -38,12 +39,14 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SandboxStep extends AbstractStepImpl {
 
     public final String name;
     public final int maxDuration;
-    private String reservationId;
 
     @DataBoundConstructor
     public SandboxStep(@Nonnull String name, @Nonnull int maxDuration) {
@@ -78,6 +81,7 @@ public class SandboxStep extends AbstractStepImpl {
             StepContext context = getContext();
             context.newBodyInvoker().
                     withContext(CreateSandbox(stepsCommon, context)).
+                    withContext(EnvironmentExpander.merge(getContext().get(EnvironmentExpander.class), new ExpanderImpl(sandboxId))).
                     withCallback(new Callback(sandboxId, listener)).
                     start();
             return false;
@@ -96,7 +100,7 @@ public class SandboxStep extends AbstractStepImpl {
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context);
+            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context);
             return false;
         }
 
@@ -140,6 +144,20 @@ public class SandboxStep extends AbstractStepImpl {
 
         }
     }
+
+    private static final class ExpanderImpl extends EnvironmentExpander {
+        private static final long serialVersionUID = 1;
+        private final Map<String,String> overrides;
+        private ExpanderImpl(String sandboxId) {
+            this.overrides = new HashMap<>();
+            this.overrides.put("SANDBOX_ID", sandboxId);
+        }
+        @Override public void expand(EnvVars env) throws IOException, InterruptedException {
+            env.overrideAll(overrides);
+        }
+    }
+
+
     @Extension
     public static class DescriptorImpl extends AbstractStepDescriptorImpl {
 
