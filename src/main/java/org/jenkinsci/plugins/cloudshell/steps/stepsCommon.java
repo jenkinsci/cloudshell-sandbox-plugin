@@ -13,7 +13,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-
 public class StepsCommon {
 
     public String StartSandbox(TaskListener listener, String name, int duration, String buildName) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnsupportedEncodingException {

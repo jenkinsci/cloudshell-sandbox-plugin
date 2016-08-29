@@ -161,18 +161,12 @@ public class SandboxStep extends AbstractStepImpl {
             return true;
         }
 
-        // TODO JENKINS-27901: need a standard control for this
         @Override
         public Step newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            String overridesS = formData.getString("overrides");
-            List<String> overrides = new ArrayList<String>();
-            for (String line : overridesS.split("\r?\n")) {
-                line = line.trim();
-                if (!line.isEmpty()) {
-                    overrides.add(line);
-                }
-            }
-            return new SandboxStep("Tomer", 4);
+            //TODO: throw nice errors if needed
+            String name = formData.getString("name");
+            int duration = Integer.parseInt(formData.getString("maxDuration"));
+            return new SandboxStep(name, duration);
         }
 
     }
