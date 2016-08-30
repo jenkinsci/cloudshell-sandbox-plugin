@@ -77,7 +77,6 @@ public class SandboxStep extends AbstractStepImpl {
         @Override
         public boolean start() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-
             StepContext context = getContext();
             context.newBodyInvoker().
                     withContext(CreateSandbox(stepsCommon, context)).

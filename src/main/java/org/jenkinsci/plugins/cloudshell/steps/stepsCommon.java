@@ -22,18 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 public class StepsCommon {
-
     public String StartSandbox(TaskListener listener, String name, int duration, StepContext context) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
         listener.getLogger().println("CloudShell Starting!");
-        CloudShellConfig.DescriptorImpl descriptorImpl =
-                (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
-        QsServerDetails server = descriptorImpl.getServer();
-        QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
-        SandboxApiGateway gateway = new SandboxApiGateway(logger, server);
+        SandboxApiGateway gateway = getSandboxApiGateway(listener);
 
         String sandboxName = null;
         EnvVars envVars = context.get(EnvVars.class);
-
         String jobName = envVars.get("JOB_NAME");
         if (jobName != null && !jobName.isEmpty())
         {
@@ -45,11 +39,15 @@ public class StepsCommon {
 
     public void StopSandbox(TaskListener listener, String sandboxId) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         listener.getLogger().println("CloudShell Stop Starting!");
+        SandboxApiGateway gateway = getSandboxApiGateway(listener);
+        gateway.StopSandbox(sandboxId, true);
+    }
+
+    private SandboxApiGateway getSandboxApiGateway(TaskListener listener) {
         CloudShellConfig.DescriptorImpl descriptorImpl =
                 (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
         QsServerDetails server = descriptorImpl.getServer();
         QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
-        SandboxApiGateway gateway = new SandboxApiGateway(logger, server);
-        gateway.StopSandbox(sandboxId, true);
+        return new SandboxApiGateway(logger, server);
     }
 }
