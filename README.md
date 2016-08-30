@@ -20,11 +20,14 @@
 ![Alt text](Pics/mainsetting.png?raw=true)
 
 ### Pipeline support (Workflow) - New!
-Use the "startSandbox" & "stopSandbox" to control CloudShell sandboxes during your pipeline flow
+The "startSandbox" and "stopSandbox" steps provide an easy way to control the lifecycle of CloudShell 
+sandboxes. You can use these steps to start a sandbox, execute some test code on it, then end it.
 ![Alt text](Pics/pipeline.png?raw=true)
 
 ### Pipeline Scope Example:
-Use the "WithSandbox" scope to control CloudShell sandboxes for list specific actions in your pipeline flow
+The "WithSandbox" step provides an alternative syntax which makes it easy to execute some code in the context of a Sandbox.
+The code passed in the closure will be guaranteed to run after the sandbox is up and ready and the sandbox teardown will be taken care
+of automatically upon exiting the scope.
 ![Alt text](Pics/PipelineScope.png?raw=true)
 
 ### Adding build steps

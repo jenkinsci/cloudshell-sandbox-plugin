@@ -3,7 +3,7 @@
     <f:entry field="name" title="Name">
         <f:textbox />
     </f:entry>
-    <f:entry field="maxDuration" title="Duration">
+    <f:entry field="maxDuration" title="Max Duration">
         <f:textbox />
     </f:entry>
 </j:jelly>
