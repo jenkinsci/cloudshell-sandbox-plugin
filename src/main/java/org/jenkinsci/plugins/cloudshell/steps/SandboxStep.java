@@ -88,8 +88,13 @@ public class SandboxStep extends AbstractStepImpl {
 
         @Override
         public void stop(@Nonnull Throwable throwable) throws Exception {
-            //TODO: Handle unexpected stop
-            listener.getLogger().println("STOPINGGGG!");
+            listener.getLogger().println("Aborting CloudShell Sandbox!");
+            if (sandboxId != null && !sandboxId.isEmpty())
+            {
+                StepsCommon stepsCommon = new StepsCommon();
+                stepsCommon.StopSandbox(listener, sandboxId);
+            }
+
         }
 
         private boolean CreateSandbox(StepsCommon stepsCommon, StepContext context) throws
