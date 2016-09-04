@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin allow using CloudShell Rest API for starting and stopping sandboxes as build steps
+  This plugin allow using CloudShell Sandbox API sandbox management as build steps
 </div>

@@ -15,12 +15,20 @@
 ## Configuring CloudShell in Jenkins
 1) Navigate to the main Jenkins settings page
 
-2) Fill all fields under "cloudshell configuraiton" section.
+2) Fill all fields under "cloudshell configuration" section.
 
 ![Alt text](Pics/mainsetting.png?raw=true)
 
 ### Pipeline support (Workflow) - New!
+The "startSandbox" and "stopSandbox" steps provide an easy way to control the lifecycle of CloudShell 
+sandboxes. You can use these steps to start a sandbox, execute some test code on it, then end it.
 ![Alt text](Pics/pipeline.png?raw=true)
+
+### Pipeline Scope Example:
+The "WithSandbox" step provides an alternative syntax which makes it easy to execute some code in the context of a Sandbox.
+The code passed in the closure will be guaranteed to run after the sandbox is up and ready and the sandbox teardown will be taken care
+of automatically upon exiting the scope.
+![Alt text](Pics/PipelineScope.png?raw=true)
 
 ### Adding build steps
 Use a pre-scm step to start a sandbox and a post-build step for stopping running sandboxes.
