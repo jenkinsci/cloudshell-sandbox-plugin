@@ -3,6 +3,14 @@
 [![Stories in Ready](https://badge.waffle.io/QualiSystems/Sandbox-Jenkins-Plugin.svg?label=ready&title=Ready)](http://waffle.io/QualiSystems/Sandbox-Jenkins-Plugin)
 [![Dependency Status](https://dependencyci.com/github/QualiSystems/Sandbox-Jenkins-Plugin/badge)](https://dependencyci.com/github/QualiSystems/Sandbox-Jenkins-Plugin)
 
+##Prerequisite
+
+1) CloudShell 7.0 and above, 'CloudShell Sandbox API' component must be installed.
+
+2) Jenkenis server 2.0 and above.
+
+
+
 ## Installation
 1) Download the hpi package from the releases tab
 
@@ -19,17 +27,6 @@
 
 ![Alt text](Pics/mainsetting.png?raw=true)
 
-### Pipeline support (Workflow) - New!
-The "startSandbox" and "stopSandbox" steps provide an easy way to control the lifecycle of CloudShell 
-sandboxes. You can use these steps to start a sandbox, execute some test code on it, then end it.
-![Alt text](Pics/pipeline.png?raw=true)
-
-### Pipeline Scope Example:
-The "WithSandbox" step provides an alternative syntax which makes it easy to execute some code in the context of a Sandbox.
-The code passed in the closure will be guaranteed to run after the sandbox is up and ready and the sandbox teardown will be taken care
-of automatically upon exiting the scope.
-![Alt text](Pics/PipelineScope.png?raw=true)
-
 ### Adding build steps
 Use a pre-scm step to start a sandbox and a post-build step for stopping running sandboxes.
 
@@ -42,6 +39,18 @@ Pre-scm step:
 Post build step:
 
 ![Alt text](Pics/postBuild.png?raw=true)
+
+### Pipeline support (Workflow) - New!
+The "startSandbox" and "stopSandbox" steps provide an easy way to control the lifecycle of CloudShell 
+sandboxes. You can use these steps to start a sandbox, execute some test code on it, then end it.
+![Alt text](Pics/pipeline.png?raw=true)
+
+### Pipeline Scope Example:
+The "WithSandbox" step provides an alternative syntax which makes it easy to execute some code in the context of a Sandbox.
+The code passed in the closure will be guaranteed to run after the sandbox is up and ready and the sandbox teardown will be taken care
+of automatically upon exiting the scope.
+![Alt text](Pics/PipelineScope.png?raw=true)
+
 
 Enjoy
 Tomer
