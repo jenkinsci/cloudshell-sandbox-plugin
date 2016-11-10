@@ -25,9 +25,11 @@ import hudson.model.BuildListener;
 import hudson.model.Items;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep.CSBuildStepDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 public class CloudShellConfig extends Builder {
@@ -78,6 +80,38 @@ public class CloudShellConfig extends Builder {
 					CloudShellConfig.class
 			);
 		}
+
+		public FormValidation doCheckPw(@QueryParameter String value) {
+			if(value.isEmpty())
+				return FormValidation.errorWithMarkup("Password cannot be empty");
+			else
+				return FormValidation.ok();
+		}
+
+		public FormValidation doCheckUser(@QueryParameter String value) {
+			if(value.isEmpty())
+				return FormValidation.errorWithMarkup("User cannot be empty");
+			else
+				return FormValidation.ok();
+		}
+
+		public FormValidation doCheckDomain(@QueryParameter String value) {
+			if(value.isEmpty())
+				return FormValidation.errorWithMarkup("Domain cannot be empty");
+			else
+				return FormValidation.ok();
+		}
+
+
+		public FormValidation doCheckServerAddress(@QueryParameter String value) {
+//			String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+			String regex = "^(https?)://[-a-zA-Z0-9-_.:]*[0-9]";
+			if(value.matches(regex))
+				return FormValidation.ok();
+			else
+				return FormValidation.errorWithMarkup("Invalid server address, see help for more details");
+		}
+
 
 		@Override
 		public String getDisplayName() {
