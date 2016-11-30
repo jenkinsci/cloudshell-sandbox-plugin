@@ -33,14 +33,18 @@ public class StepsCommon {
         {
             sandboxName = jobName + "_" + java.util.UUID.randomUUID().toString().substring(0, 5);;
         }
-        String sandboxId = gateway.startBlueprint(name, duration, true, sandboxName);
+        String sandboxId = gateway.StartBlueprint(name, duration, true, sandboxName, null);
         return sandboxId;
     }
 
     public void StopSandbox(TaskListener listener, String sandboxId) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         listener.getLogger().println("CloudShell Stop Starting!");
         SandboxApiGateway gateway = getSandboxApiGateway(listener);
-        gateway.StopSandbox(sandboxId, true);
+        try {
+            gateway.StopSandbox(sandboxId, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private SandboxApiGateway getSandboxApiGateway(TaskListener listener) {

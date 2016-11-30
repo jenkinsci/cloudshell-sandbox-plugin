@@ -28,22 +28,27 @@ import org.jenkinsci.plugins.cloudshell.VariableInjectionAction;
 import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StartSandbox extends CloudShellBuildStep {
 
 	private final String blueprintName;
 	private final String sandboxDuration;
+	private final String params;
 	private final int maxWaitForSandboxAvailability;
 
 	@DataBoundConstructor
-	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability) {
+	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability, String params) {
 		this.blueprintName = blueprintName;
 		this.sandboxDuration = sandboxDuration;
 		this.maxWaitForSandboxAvailability = maxWaitForSandboxAvailability;
+		this.params = params;
 	}
 
 	public String getBlueprintName() {
@@ -57,6 +62,8 @@ public class StartSandbox extends CloudShellBuildStep {
 	public int getMaxWaitForSandboxAvailability() {
 		return maxWaitForSandboxAvailability;
 	}
+
+	public String getParams() { return params; }
 
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
 		return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
@@ -85,11 +92,35 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 
 
+	private Map<String, String> parseParams() throws SandboxApiException {
+		if (!params.isEmpty()) {
+			Map<String, String> map = new HashMap<>();
+			String[] parameters = params.split(";");
+			for (String params: parameters) {
+				String[] split = params.trim().split("=");
+                if (split.length < 2) throw new SandboxApiException("Failed to parse blueprint parameters");
+                map.put(split[0], split[1]);
+			}
+            return map;
+		}
+		return null;
+	}
+
 	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
 		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), qsServerDetails);
-        String sandboxId = gateway.startBlueprint(blueprintName, Integer.parseInt(sandboxDuration), true, null);
-        String sandboxDetails = gateway.GetSandboxDetails(sandboxId);
-        addSandboxToBuildActions(build, qsServerDetails, sandboxId, sandboxDetails);
+		String sandboxId = null;
+		try {
+			sandboxId = gateway.StartBlueprint(blueprintName, Integer.parseInt(sandboxDuration), true, null, parseParams());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String sandboxDetails = null;
+		try {
+			sandboxDetails = gateway.GetSandboxDetails(sandboxId);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		addSandboxToBuildActions(build, qsServerDetails, sandboxId, sandboxDetails);
 		return true;
 	}
 
