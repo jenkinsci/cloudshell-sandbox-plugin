@@ -7,9 +7,15 @@
 
 1) CloudShell 7.0 and above, 'CloudShell Sandbox API' component must be installed.
 
-2) Jenkenis server 2.0 and above.
+2) Jenkins server 2.0 and above.
 
+##Architecture
 
+1) open port between Jenkins Slaves and the CloudShell Web Server (82 by default but configurable)
+
+Distributed architecture:
+
+![Alt text](Pics/Jenkinspluginarchitecture.jpg?raw=true)
 
 ## Installation
 1) Download the hpi package from the releases tab
