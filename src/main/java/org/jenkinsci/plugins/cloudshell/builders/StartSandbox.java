@@ -96,12 +96,12 @@ public class StartSandbox extends CloudShellBuildStep {
 		if (!params.isEmpty()) {
 			Map<String, String> map = new HashMap<>();
 			String[] parameters = params.split(";");
-			for (String params: parameters) {
-				String[] split = params.trim().split("=");
-                if (split.length < 2) throw new SandboxApiException("Failed to parse blueprint parameters");
-                map.put(split[0], split[1]);
+			for (String param: parameters) {
+				String[] split = param.trim().split("=");
+				if (split.length < 2) throw new SandboxApiException("Failed to parse blueprint parameters");
+				map.put(split[0], split[1]);
 			}
-            return map;
+			return map;
 		}
 		return null;
 	}

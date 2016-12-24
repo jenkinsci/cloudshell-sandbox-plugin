@@ -25,10 +25,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class ExecuteComponentCommand extends CloudShellBuildStep {
 
 	private final String sandboxId;
+	private final String componentId;
 	private final String commandName;
 
 	@DataBoundConstructor
-	public ExecuteComponentCommand(String sandboxId, String commandName) {
+	public ExecuteComponentCommand(String sandboxId, String componentId, String commandName) {
+		this.componentId = componentId;
 		this.commandName = commandName;
 		this.sandboxId = sandboxId;
 	}
@@ -39,6 +41,10 @@ public class ExecuteComponentCommand extends CloudShellBuildStep {
 
 	public String getCommandName() {
 		return commandName;
+	}
+
+	public String getComponentId() {
+		return componentId;
 	}
 
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
@@ -54,7 +60,7 @@ public class ExecuteComponentCommand extends CloudShellBuildStep {
 
 		@Override
 		public String getDisplayName() {
-			return "Execute Sandbox Command";
+			return "Execute Component Command";
 		}
 
 	}	

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class StepsCommon {
-    public String StartSandbox(TaskListener listener, String name, int duration, StepContext context) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
+    public String StartSandbox(TaskListener listener, String name, int duration, StepContext context, String parameters) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
         listener.getLogger().println("CloudShell Starting!");
         SandboxApiGateway gateway = getSandboxApiGateway(listener);
 
@@ -33,8 +33,22 @@ public class StepsCommon {
         {
             sandboxName = jobName + "_" + java.util.UUID.randomUUID().toString().substring(0, 5);;
         }
-        String sandboxId = gateway.StartBlueprint(name, duration, true, sandboxName, null);
+        String sandboxId = gateway.StartBlueprint(name, duration, true, sandboxName, parseParams(parameters));
         return sandboxId;
+    }
+
+    private Map<String, String> parseParams(String params) throws SandboxApiException {
+        if (!params.isEmpty()) {
+            Map<String, String> map = new HashMap<>();
+            String[] parameters = params.split(";");
+            for (String param: parameters) {
+                String[] split = param.trim().split("=");
+                if (split.length < 2) throw new SandboxApiException("Failed to parse blueprint parameters");
+                map.put(split[0], split[1]);
+            }
+            return map;
+        }
+        return null;
     }
 
     public void StopSandbox(TaskListener listener, String sandboxId) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {

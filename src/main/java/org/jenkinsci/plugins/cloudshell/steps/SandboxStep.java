@@ -40,18 +40,19 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SandboxStep extends AbstractStepImpl {
 
     public final String name;
     public final int maxDuration;
+    public final String params;
 
     @DataBoundConstructor
-    public SandboxStep(@Nonnull String name, @Nonnull int maxDuration) {
+    public SandboxStep(@Nonnull String name, @Nonnull int maxDuration, String params) {
         this.name = name;
         this.maxDuration = maxDuration;
+        this.params = params;
     }
 
     public String getName() {
@@ -104,7 +105,7 @@ public class SandboxStep extends AbstractStepImpl {
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context);
+            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context, step.params);
             return false;
         }
 
@@ -189,7 +190,8 @@ public class SandboxStep extends AbstractStepImpl {
             //TODO: throw nice errors if needed
             String name = formData.getString("name");
             int duration = Integer.parseInt(formData.getString("maxDuration"));
-            return new SandboxStep(name, duration);
+            String params = formData.getString("params");
+            return new SandboxStep(name, duration, params);
         }
 
     }

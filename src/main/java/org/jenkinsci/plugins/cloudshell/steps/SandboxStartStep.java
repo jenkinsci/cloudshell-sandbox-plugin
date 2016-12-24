@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -15,11 +14,13 @@ import javax.annotation.Nonnull;
 public class SandboxStartStep extends AbstractStepImpl {
 
     public final String name;
+    public final String params;
     public final int maxDuration;
 
     @DataBoundConstructor
-    public SandboxStartStep(@Nonnull String name, @Nonnull int maxDuration) {
+    public SandboxStartStep(@Nonnull String name, String params, @Nonnull int maxDuration) {
         this.name = name;
+        this.params = params;
         this.maxDuration = maxDuration;
     }
 
@@ -49,7 +50,7 @@ public class SandboxStartStep extends AbstractStepImpl {
         @Override
         protected String run() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-            return stepsCommon.StartSandbox(listener, step.name, step.maxDuration, getContext());
+            return stepsCommon.StartSandbox(listener, step.name, step.maxDuration, getContext(),step.params);
         }
 
         private static final long serialVersionUID = 1L;

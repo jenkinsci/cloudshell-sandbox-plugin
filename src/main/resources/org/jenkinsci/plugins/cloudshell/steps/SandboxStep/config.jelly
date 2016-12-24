@@ -6,4 +6,8 @@
     <f:entry field="maxDuration" title="Max Duration">
         <f:textbox />
     </f:entry>
+        <f:entry field="params" title="Inputs">
+        <f:textbox />
+        Blueprint Parameter in this syntax: "input1=my_name; input2=30"
+    </f:entry>
 </j:jelly>
