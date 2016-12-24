@@ -1,0 +1,38 @@
+<!--
+Copyright 2013, MANDIANT, Eric Lordahl
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<f:entry title="${%Blueprint Name}" field="blueprintName">
+      <f:textbox  />
+    </f:entry>
+    <f:entry title="${%Sandbox Duration in minuets}" field="sandboxDuration">
+          <f:textbox/>
+    </f:entry>
+        <f:entry title="${%Timeout if Sandbox unavailable}" field="maxWaitForSandboxAvailability">
+              <f:textbox default="10"/>
+                Newly created Sandbox Id will be available under $SANDBOX_ID environment variable. Sandbox information will be stored under $SANDBOX_DETAILS environment variable.
+        </f:entry>
+            <f:advanced>
+                <f:entry title="${%Parameters}" field="params">
+                  <f:textbox />
+                  Blueprint Parameter in this syntax: "input1=my_name; input2=30"
+                </f:entry>
+                <f:entry title="${%Blueprint Domain}" field="url">
+                      <f:textbox />
+                      If the blueprint exists in another domain that the preconfigured user has permissions to.
+                </f:entry>
+              </f:advanced>
+</j:jelly>
