@@ -14,10 +14,10 @@
  */
 package org.jenkinsci.plugins.cloudshell.builders;
 
-import com.quali.cloudshell.QsExceptions.ReserveBluePrintConflictException;
-import com.quali.cloudshell.QsExceptions.SandboxApiException;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.qsExceptions.ReserveBluePrintConflictException;
+import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -109,7 +109,7 @@ public class StartSandbox extends CloudShellBuildStep {
 	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
 		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), qsServerDetails);
 		String sandboxId = null;
-		try {
+		try { //SANDBOX_NAME is null?!
 			sandboxId = gateway.StartBlueprint(blueprintName, Integer.parseInt(sandboxDuration), true, null, parseParams());
 		} catch (IOException e) {
 			e.printStackTrace();

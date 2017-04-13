@@ -42,6 +42,9 @@ Pre-scm step:
 
 ![Alt text](Pics/PreSCM.png?raw=true)
 
+Build step with parameters and the option to choose specific domain for the blueprint
+![Alt text](Pics/startblueprint80.png?raw=true)
+
 Post build step:
 
 ![Alt text](Pics/postBuild.png?raw=true)

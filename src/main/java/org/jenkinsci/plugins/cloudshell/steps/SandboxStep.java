@@ -25,7 +25,7 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
-import com.quali.cloudshell.QsExceptions.SandboxApiException;
+import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.TaskListener;
