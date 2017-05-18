@@ -38,7 +38,6 @@ public class StartSandbox extends CloudShellBuildStep {
 	private final String blueprintName;
 	private final String sandboxDuration;
 	private final int maxWaitForSandboxAvailability;
-	private QsJenkinsTaskLogger logger;
 
 	@DataBoundConstructor
 	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability) {
@@ -60,7 +59,6 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
-		logger = new QsJenkinsTaskLogger(listener);
 		return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
 	}
 
@@ -88,7 +86,7 @@ public class StartSandbox extends CloudShellBuildStep {
 
 
 	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
-		SandboxApiGateway gateway = new SandboxApiGateway(logger, qsServerDetails);
+		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), qsServerDetails);
         String sandboxId = gateway.startBlueprint(blueprintName, Integer.parseInt(sandboxDuration), true, null);
         String sandboxDetails = gateway.GetSandboxDetails(sandboxId);
         addSandboxToBuildActions(build, qsServerDetails, sandboxId, sandboxDetails);
