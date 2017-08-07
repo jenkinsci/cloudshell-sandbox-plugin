@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.cloudshell.steps;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
 import com.google.inject.Inject;
+import com.quali.cloudshell.qsExceptions.TeardownFailedException;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;

@@ -3,7 +3,9 @@ package org.jenkinsci.plugins.cloudshell.steps;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
+import com.quali.cloudshell.qsExceptions.TeardownFailedException;
 import hudson.EnvVars;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.cloudshell.CloudShellConfig;
@@ -50,11 +52,21 @@ public class StepsCommon {
     public void StopSandbox(TaskListener listener, String sandboxId) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         listener.getLogger().println("CloudShell Stop Starting!");
         SandboxApiGateway gateway = getSandboxApiGateway(listener);
+
         try {
             gateway.StopSandbox(sandboxId, true);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        try {
+            gateway.VerifyTeardownSucceeded(sandboxId);
+        } catch (TeardownFailedException e) {
+            listener.getLogger().println("[ERROR] - Teardown failed to complete, see sandbox:  " + sandboxId);
+        } catch (SandboxApiException | IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private SandboxApiGateway getSandboxApiGateway(TaskListener listener) {

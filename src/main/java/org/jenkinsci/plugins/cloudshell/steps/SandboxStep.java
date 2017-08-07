@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
+import com.quali.cloudshell.qsExceptions.TeardownFailedException;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.TaskListener;
@@ -92,10 +93,8 @@ public class SandboxStep extends AbstractStepImpl {
             listener.getLogger().println("Aborting CloudShell Sandbox!");
             if (sandboxId != null && !sandboxId.isEmpty())
             {
-                StepsCommon stepsCommon = new StepsCommon();
-                stepsCommon.StopSandbox(listener, sandboxId);
+                new StepsCommon().StopSandbox(listener, sandboxId);
             }
-
         }
 
         private boolean CreateSandbox(StepsCommon stepsCommon, StepContext context) throws
@@ -124,13 +123,9 @@ public class SandboxStep extends AbstractStepImpl {
                 StepsCommon stepsCommon = new StepsCommon();
                 try {
                     stepsCommon.StopSandbox(listener, sandboxId);
-                } catch (SandboxApiException e) {
-                    e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                } catch (KeyStoreException e) {
-                    e.printStackTrace();
-                } catch (KeyManagementException e) {
+                } catch (TeardownFailedException e) {
+                    listener.error("Faild to complete teardown");
+                } catch (SandboxApiException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
                     e.printStackTrace();
                 }
             }
@@ -157,7 +152,7 @@ public class SandboxStep extends AbstractStepImpl {
             this.overrides = new HashMap<>();
             this.overrides.put("SANDBOX_ID", sandboxId);
         }
-        @Override public void expand(EnvVars env) throws IOException, InterruptedException {
+        @Override public void expand(@Nonnull EnvVars env) throws IOException, InterruptedException {
             env.overrideAll(overrides);
         }
     }
@@ -175,6 +170,7 @@ public class SandboxStep extends AbstractStepImpl {
             return "withSandbox";
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Use sandbox in a specific scope";
