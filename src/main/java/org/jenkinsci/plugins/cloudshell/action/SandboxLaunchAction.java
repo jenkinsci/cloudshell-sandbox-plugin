@@ -36,10 +36,6 @@ public class SandboxLaunchAction implements Action, Serializable, Cloneable{
         runningSandboxes.add( sandboxId );
     }
 
-    public void stopped(String sandboxId) {
-        runningSandboxes.remove( sandboxId );
-    }
-
     public Iterable<String> getRunning() {
         return runningSandboxes;
     }

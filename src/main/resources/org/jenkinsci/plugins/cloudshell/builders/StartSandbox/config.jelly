@@ -7,18 +7,19 @@
     <f:entry title="${%Sandbox Duration in minuets}" field="sandboxDuration">
           <f:textbox/>
     </f:entry>
-        <f:entry title="${%Timeout if Sandbox unavailable}" field="maxWaitForSandboxAvailability">
-              <f:textbox default="10"/>
-                Newly created Sandbox Id will be available under $SANDBOX_ID environment variable. Sandbox information will be stored under $SANDBOX_DETAILS environment variable.
-        </f:entry>
+    Newly created Sandbox Id will be available under $SANDBOX_ID environment variable. Sandbox information will be stored under $SANDBOX_DETAILS environment variable.
             <f:advanced>
-                <f:entry title="${%Parameters}" field="params">
-                  <f:textbox />
-                  Blueprint Parameter in this syntax: "input1=my_name; input2=30"
+                <f:entry title="${%Timeout if Sandbox unavailable}" field="maxWaitForSandboxAvailability">
+                      <f:textbox default="10"/>
                 </f:entry>
-                <f:entry title="${%Blueprint Domain}" field="url">
+                <f:entry title="${%Blueprint Parameters}" field="params">
+                  <f:textbox />
+                </f:entry>
+                <f:entry title="${%Blueprint Domain}" field="blueprintDomain">
                       <f:textbox />
-                      If the blueprint exists in another domain that the preconfigured user has permissions to.
+                </f:entry>
+                <f:entry title="${%Sandbox Name}" field="sandboxName">
+                      <f:textbox />
                 </f:entry>
               </f:advanced>
 </j:jelly>

@@ -41,29 +41,36 @@ public class StartSandbox extends CloudShellBuildStep {
 	private final String blueprintName;
 	private final String sandboxDuration;
 	private final String params;
+	private final String blueprintDomain;
 	private final int maxWaitForSandboxAvailability;
+	private final String sandboxName;
 
 	@DataBoundConstructor
-	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability, String params) {
+	public StartSandbox(String blueprintName, String sandboxDuration, String blueprintDomain, int maxWaitForSandboxAvailability, String params, String sandboxName) {
 		this.blueprintName = blueprintName;
 		this.sandboxDuration = sandboxDuration;
+		this.blueprintDomain = blueprintDomain;
 		this.maxWaitForSandboxAvailability = maxWaitForSandboxAvailability;
 		this.params = params;
+		this.sandboxName = sandboxName;
 	}
 
 	public String getBlueprintName() {
 		return blueprintName;
 	}
-
 	public String getSandboxDuration() {
 		return sandboxDuration;
 	}
-
 	public int getMaxWaitForSandboxAvailability() {
 		return maxWaitForSandboxAvailability;
 	}
-
 	public String getParams() { return params; }
+	public String getSandboxName() {
+		return sandboxName;
+	}
+	public String getBlueprintDomain() {
+		return blueprintDomain;
+	}
 
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
 		return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
@@ -85,9 +92,7 @@ public class StartSandbox extends CloudShellBuildStep {
 				throw e;
 			}
 			Thread.sleep(30*1000);
-
 		}
-
 		return  false;
 	}
 
@@ -106,20 +111,16 @@ public class StartSandbox extends CloudShellBuildStep {
 		return null;
 	}
 
-	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
+	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
 		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), qsServerDetails);
 		String sandboxId = null;
-		try { //SANDBOX_NAME is null?!
-			sandboxId = gateway.StartBlueprint(blueprintName, Integer.parseInt(sandboxDuration), true, null, parseParams());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String sandboxDetails = null;
-		try {
-			sandboxDetails = gateway.GetSandboxDetails(sandboxId);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		sandboxId = gateway.StartBlueprint(blueprintName,
+					Integer.parseInt(sandboxDuration),
+					true,
+					(sandboxName.isEmpty()) ? null : sandboxName,
+					parseParams());
+
+		String sandboxDetails = gateway.GetSandboxDetails(sandboxId);
 		addSandboxToBuildActions(build, qsServerDetails, sandboxId, sandboxDetails);
 		return true;
 	}
@@ -133,7 +134,7 @@ public class StartSandbox extends CloudShellBuildStep {
     }
 
 
-    @Extension
+	@Extension
 	public static final class startSandboxDescriptor extends CSBuildStepDescriptor {
 
 		public startSandboxDescriptor() {

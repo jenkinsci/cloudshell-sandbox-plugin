@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin allow using CloudShell Sandbox API sandbox management as build steps
+  Manage CloudShell Sandboxes using build steps
 </div>

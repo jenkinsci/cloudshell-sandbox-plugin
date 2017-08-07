@@ -25,7 +25,7 @@ import hudson.model.Describable;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 
-public abstract class CloudShellBuildStep implements Describable<CloudShellBuildStep>, ExtensionPoint {
+public abstract class CloudShellBuildStep implements Describable<CloudShellBuildStep> {
 
 	protected SandboxApiGateway CsServer;
 

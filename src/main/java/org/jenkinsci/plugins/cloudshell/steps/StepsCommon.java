@@ -62,6 +62,11 @@ public class StepsCommon {
                 (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
         QsServerDetails server = descriptorImpl.getServer();
         QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
-        return new SandboxApiGateway(logger, server);
+        try {
+            return new SandboxApiGateway(logger, server);
+        } catch (SandboxApiException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
