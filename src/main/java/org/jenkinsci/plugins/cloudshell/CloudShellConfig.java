@@ -14,6 +14,8 @@
  */
 package org.jenkinsci.plugins.cloudshell;
 import com.quali.cloudshell.QsServerDetails;
+import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.Launcher;
@@ -31,6 +33,12 @@ import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep.CSBuildStepDescripto
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 public class CloudShellConfig extends Builder {
 
@@ -79,6 +87,31 @@ public class CloudShellConfig extends Builder {
 					"org.jenkinsci.plugins.cloudshell.CloudShellConfig",
 					CloudShellConfig.class
 			);
+		}
+
+		public FormValidation doTestConnection(
+				@QueryParameter("serverAddress") final String serverAddress,
+				@QueryParameter("user") final String user,
+				@QueryParameter("pw") final String pw,
+				@QueryParameter("domain") final String domain,
+				@QueryParameter("ignoreSSL") final boolean ignoreSSL ){
+					try {
+						SandboxApiGateway gateway = new SandboxApiGateway(null, new QsServerDetails(serverAddress, user, pw, domain, ignoreSSL));
+						gateway.TryLogin();
+					} catch (SandboxApiException e) {
+						return FormValidation.error(e.getMessage());
+					} catch (NoSuchAlgorithmException e) {
+						return FormValidation.error(e.getMessage());
+					} catch (UnknownHostException e) {
+						return FormValidation.error("Unknown Host: " + e.getMessage());
+					} catch (IOException e) {
+						return FormValidation.error(e.getMessage());
+					} catch (KeyStoreException e) {
+						return FormValidation.error(e.getMessage());
+					} catch (KeyManagementException e) {
+						return FormValidation.error(e.getMessage());
+					}
+					return FormValidation.ok("Test completed successfully");
 		}
 
 		public FormValidation doCheckPw(@QueryParameter String value) {
