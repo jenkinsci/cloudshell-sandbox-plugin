@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
-import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import com.quali.cloudshell.qsExceptions.TeardownFailedException;
@@ -16,6 +15,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,12 +31,11 @@ public class StepsCommon {
         {
             sandboxName = jobName + "_" + java.util.UUID.randomUUID().toString().substring(0, 5);;
         }
-        String sandboxId = gateway.StartBlueprint(name, duration, true, sandboxName, parseParams(parameters));
-        return sandboxId;
+        return gateway.StartBlueprint(name, duration, true, sandboxName, parseParams(parameters));
     }
 
     private Map<String, String> parseParams(String params) throws SandboxApiException {
-        if (!params.isEmpty()) {
+        if (params != null && !params.isEmpty()) {
             Map<String, String> map = new HashMap<>();
             String[] parameters = params.split(";");
             for (String param: parameters) {
@@ -49,36 +48,26 @@ public class StepsCommon {
         return null;
     }
 
-    public void StopSandbox(TaskListener listener, String sandboxId) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        listener.getLogger().println("CloudShell Stop Starting!");
-        SandboxApiGateway gateway = getSandboxApiGateway(listener);
-
+    public void StopSandbox(TaskListener listener, String sandboxId, StepContext context){
+        listener.getLogger().println("Sandbox plugin:  Sandbox Cleanup in progress");
         try {
+            SandboxApiGateway gateway = getSandboxApiGateway(listener);
             gateway.StopSandbox(sandboxId, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
             gateway.VerifyTeardownSucceeded(sandboxId);
         } catch (TeardownFailedException e) {
-            listener.getLogger().println("[ERROR] - Teardown failed to complete, see sandbox:  " + sandboxId);
-        } catch (SandboxApiException | IOException e) {
-            e.printStackTrace();
+            listener.error("Teardown ended with erroes, see sandbox:  " + sandboxId);
+            context.setResult(Result.FAILURE);
+        } catch (SandboxApiException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+           listener.error("Failed to stop sandbox:  " + e.getMessage() + ". \n" + Arrays.toString(e.getStackTrace()));
+           context.setResult(Result.FAILURE);
         }
-
     }
 
-    private SandboxApiGateway getSandboxApiGateway(TaskListener listener) {
+    private SandboxApiGateway getSandboxApiGateway(TaskListener listener) throws SandboxApiException {
         CloudShellConfig.DescriptorImpl descriptorImpl =
                 (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
-        QsServerDetails server = descriptorImpl.getServer();
-        QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
-        try {
-            return new SandboxApiGateway(logger, server);
-        } catch (SandboxApiException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new SandboxApiGateway(
+                new QsJenkinsTaskLogger(listener),
+                descriptorImpl.getServer());
     }
 }

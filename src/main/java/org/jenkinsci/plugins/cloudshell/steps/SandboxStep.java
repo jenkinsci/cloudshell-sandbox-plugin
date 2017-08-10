@@ -29,6 +29,7 @@ import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import com.quali.cloudshell.qsExceptions.TeardownFailedException;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.steps.*;
@@ -40,6 +41,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +51,7 @@ public class SandboxStep extends AbstractStepImpl {
     public final int maxDuration;
     public final String params;
 
+    @Deprecated
     @DataBoundConstructor
     public SandboxStep(@Nonnull String name, @Nonnull int maxDuration, String params) {
         this.name = name;
@@ -93,7 +96,7 @@ public class SandboxStep extends AbstractStepImpl {
             listener.getLogger().println("Aborting CloudShell Sandbox!");
             if (sandboxId != null && !sandboxId.isEmpty())
             {
-                new StepsCommon().StopSandbox(listener, sandboxId);
+                new StepsCommon().StopSandbox(listener, sandboxId, getContext());
             }
         }
 
@@ -121,13 +124,7 @@ public class SandboxStep extends AbstractStepImpl {
 
             private void stopSandbox(StepContext context) {
                 StepsCommon stepsCommon = new StepsCommon();
-                try {
-                    stepsCommon.StopSandbox(listener, sandboxId);
-                } catch (TeardownFailedException e) {
-                    listener.error("Faild to complete teardown");
-                } catch (SandboxApiException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-                    e.printStackTrace();
-                }
+                stepsCommon.StopSandbox(listener, sandboxId, context);
             }
 
             @Override

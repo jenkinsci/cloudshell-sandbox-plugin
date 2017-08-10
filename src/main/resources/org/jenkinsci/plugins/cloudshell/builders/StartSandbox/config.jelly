@@ -15,7 +15,7 @@
                 <f:entry title="${%Blueprint Parameters}" field="params">
                   <f:textbox />
                 </f:entry>
-                <f:entry title="${%Blueprint Domain}" field="blueprintDomain">
+                <f:entry title="${%Sandbox Domain}" field="blueprintDomain">
                       <f:textbox />
                 </f:entry>
                 <f:entry title="${%Sandbox Name}" field="sandboxName">

@@ -1,16 +1,14 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
-import com.quali.cloudshell.QsServerDetails;
-import com.quali.cloudshell.SandboxApiGateway;
 import com.google.inject.Inject;
-import com.quali.cloudshell.qsExceptions.TeardownFailedException;
+import hudson.AbortException;
 import hudson.Extension;
-import hudson.model.Run;
+import hudson.model.Result;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.cloudshell.CloudShellConfig;
-import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -53,7 +51,7 @@ public class SandboxStopStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-            stepsCommon.StopSandbox(listener, step.reservationId);
+            stepsCommon.StopSandbox(listener, step.reservationId, getContext());
             return null;
         }
     }

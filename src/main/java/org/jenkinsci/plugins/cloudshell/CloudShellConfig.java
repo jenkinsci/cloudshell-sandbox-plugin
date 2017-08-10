@@ -98,20 +98,14 @@ public class CloudShellConfig extends Builder {
 					try {
 						SandboxApiGateway gateway = new SandboxApiGateway(null, new QsServerDetails(serverAddress, user, pw, domain, ignoreSSL));
 						gateway.TryLogin();
-					} catch (SandboxApiException e) {
-						return FormValidation.error(e.getMessage());
-					} catch (NoSuchAlgorithmException e) {
+					} catch (SandboxApiException | KeyStoreException | KeyManagementException | NoSuchAlgorithmException e) {
 						return FormValidation.error(e.getMessage());
 					} catch (UnknownHostException e) {
 						return FormValidation.error("Unknown Host: " + e.getMessage());
 					} catch (IOException e) {
 						return FormValidation.error(e.getMessage());
-					} catch (KeyStoreException e) {
-						return FormValidation.error(e.getMessage());
-					} catch (KeyManagementException e) {
-						return FormValidation.error(e.getMessage());
 					}
-					return FormValidation.ok("Test completed successfully");
+            return FormValidation.ok("Test completed successfully");
 		}
 
 		public FormValidation doCheckPw(@QueryParameter String value) {

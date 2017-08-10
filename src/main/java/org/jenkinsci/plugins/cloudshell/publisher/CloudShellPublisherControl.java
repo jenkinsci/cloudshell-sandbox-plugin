@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -67,10 +68,11 @@ public class CloudShellPublisherControl extends Recorder implements Serializable
                     SandboxApiGateway sandboxApiGateway = new SandboxApiGateway(logger, serverDetails);
                     sandboxApiGateway.VerifyTeardownSucceeded(sandboxId);
                 } catch (TeardownFailedException e) {
-                    listener.getLogger().println("[ERROR] - Teardown failed to complete, see sandbox:  " + sandboxId);
+                    listener.getLogger().println("Teardown ended with erroes, see sandbox:  " + sandboxId);
                     build.setResult(Result.FAILURE);
                 } catch (SandboxApiException e) {
-                    e.printStackTrace();
+                    listener.error("Failed to stop sandbox:  " + e.getMessage() + ". \n" + Arrays.toString(e.getStackTrace()));
+                    build.setResult(Result.FAILURE);
                 }
             }
         }

@@ -29,7 +29,6 @@ import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -41,15 +40,15 @@ public class StartSandbox extends CloudShellBuildStep {
 	private final String blueprintName;
 	private final String sandboxDuration;
 	private final String params;
-	private final String blueprintDomain;
+	private final String sandboxDomain;
 	private final int maxWaitForSandboxAvailability;
 	private final String sandboxName;
 
 	@DataBoundConstructor
-	public StartSandbox(String blueprintName, String sandboxDuration, String blueprintDomain, int maxWaitForSandboxAvailability, String params, String sandboxName) {
+	public StartSandbox(String blueprintName, String sandboxDuration, String sandboxDomain, int maxWaitForSandboxAvailability, String params, String sandboxName) {
 		this.blueprintName = blueprintName;
 		this.sandboxDuration = sandboxDuration;
-		this.blueprintDomain = blueprintDomain;
+		this.sandboxDomain = sandboxDomain;
 		this.maxWaitForSandboxAvailability = maxWaitForSandboxAvailability;
 		this.params = params;
 		this.sandboxName = sandboxName;
@@ -68,8 +67,8 @@ public class StartSandbox extends CloudShellBuildStep {
 	public String getSandboxName() {
 		return sandboxName;
 	}
-	public String getBlueprintDomain() {
-		return blueprintDomain;
+	public String getSandboxDomain() {
+		return sandboxDomain;
 	}
 
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
@@ -87,9 +86,6 @@ public class StartSandbox extends CloudShellBuildStep {
 			}
 			catch (ReserveBluePrintConflictException ce){
 				listener.getLogger().println("Waiting for sandbox to become available...");
-			}
-			catch (Exception e){
-				throw e;
 			}
 			Thread.sleep(30*1000);
 		}
@@ -113,8 +109,7 @@ public class StartSandbox extends CloudShellBuildStep {
 
 	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
 		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), qsServerDetails);
-		String sandboxId = null;
-		sandboxId = gateway.StartBlueprint(blueprintName,
+		String sandboxId = gateway.StartBlueprint(blueprintName,
 					Integer.parseInt(sandboxDuration),
 					true,
 					(sandboxName.isEmpty()) ? null : sandboxName,

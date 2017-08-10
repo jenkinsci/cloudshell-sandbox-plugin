@@ -123,7 +123,7 @@
     <dependency>
       <groupId>com.quali.cloudshell</groupId>
       <artifactId>sandbox-api</artifactId>
-      <version>1.1.0.3-SNAPSHOT</version>
+      <version>1.1.0.5-SNAPSHOT</version>
     </dependency>
 
   </dependencies>
