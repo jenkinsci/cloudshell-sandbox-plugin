@@ -44,7 +44,15 @@
       <id>repo.jenkins-ci.org</id>
       <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
+
+    <repository>
+      <id>snapshots-repo</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases><enabled>false</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
+    </repository>
   </repositories>
+
   <pluginRepositories>
     <pluginRepository>
       <id>repo.jenkins-ci.org</id>
@@ -59,7 +67,7 @@
       <artifactId>sandbox-api</artifactId>
       <version>1.1.0.5-SNAPSHOT</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
