@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-    <f:entry field="name" title="Name">
+    <f:entry field="name" title="Blueprint Name">
         <f:textbox />
     </f:entry>
-    <f:entry field="maxDuration" title="Duration">
+    <f:entry field="duration" title="Sandbox Duration in minuets">
+        <f:textbox default="10"/>
+    </f:entry>
+    <f:entry field="params" title="Blueprint Parameters">
+        <f:textbox />
+        Blueprint Parameter in this syntax: "input1=my_name; input2=30"
+    </f:entry>
+    <f:advanced>
+    <f:entry field="timeout" title="Timeout if Sandbox unavailable (minuets)">
+        <f:textbox default="10"/>
+    </f:entry>
+    <f:entry field="sandboxName" title="Sandbox Name">
         <f:textbox />
     </f:entry>
-        <f:entry field="params" title="Parameters">
-            <f:textbox />
-            Blueprint Parameter in this syntax: "input1=my_name; input2=30"
-        </f:entry>
+    </f:advanced>
 </j:jelly>

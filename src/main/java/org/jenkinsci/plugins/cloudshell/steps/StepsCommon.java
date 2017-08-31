@@ -1,9 +1,9 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.qsExceptions.ReserveBluePrintConflictException;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import com.quali.cloudshell.qsExceptions.TeardownFailedException;
-import hudson.EnvVars;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
@@ -20,19 +20,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StepsCommon {
-    public String StartSandbox(TaskListener listener, String name, int duration, StepContext context, String parameters) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
-        listener.getLogger().println("CloudShell Starting!");
+    public String StartSandbox(TaskListener listener, String name, int duration, StepContext context, String parameters, String sandboxName, int timeout)
+            throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
+
         SandboxApiGateway gateway = getSandboxApiGateway(listener);
 
-        String sandboxName = null;
-        EnvVars envVars = context.get(EnvVars.class);
-        String jobName = envVars.get("JOB_NAME");
-        if (jobName != null && !jobName.isEmpty())
-        {
-            sandboxName = jobName + "_" + java.util.UUID.randomUUID().toString().substring(0, 5);;
+        long startTime = System.currentTimeMillis();
+        while ((System.currentTimeMillis()-startTime) <= timeout * 60 * 1000 ){
+            try {
+                return gateway.StartBlueprint(name, duration, true, (sandboxName.isEmpty()) ? null : sandboxName, parseParams(parameters));
+            }
+            catch (ReserveBluePrintConflictException ce){
+                listener.getLogger().println("Waiting for sandbox to become available...");
+            }
+            Thread.sleep(30*1000);
         }
-        return gateway.StartBlueprint(name, duration, true, sandboxName, parseParams(parameters));
+        return null;
     }
+
 
     private Map<String, String> parseParams(String params) throws SandboxApiException {
         if (params != null && !params.isEmpty()) {

@@ -26,10 +26,8 @@ package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
-import com.quali.cloudshell.qsExceptions.TeardownFailedException;
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.Result;
 import hudson.model.TaskListener;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.steps.*;
@@ -41,7 +39,6 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,13 +47,17 @@ public class SandboxStep extends AbstractStepImpl {
     public final String name;
     public final int maxDuration;
     public final String params;
+    public final String sandboxName;
+    public final int timeout;
 
     @Deprecated
     @DataBoundConstructor
-    public SandboxStep(@Nonnull String name, @Nonnull int maxDuration, String params) {
+    public SandboxStep(@Nonnull String name, int maxDuration, String params, String sandboxName, int timeout) {
         this.name = name;
         this.maxDuration = maxDuration;
         this.params = params;
+        this.sandboxName = sandboxName;
+        this.timeout = timeout;
     }
 
     public String getName() {
@@ -107,7 +108,7 @@ public class SandboxStep extends AbstractStepImpl {
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context, step.params);
+            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context, step.params, step.sandboxName, step.timeout);
             return false;
         }
 
@@ -182,9 +183,11 @@ public class SandboxStep extends AbstractStepImpl {
         public Step newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             //TODO: throw nice errors if needed
             String name = formData.getString("name");
-            int duration = Integer.parseInt(formData.getString("maxDuration"));
+            int duration = Integer.parseInt(formData.getString("duration"));
+            int timeout = Integer.parseInt(formData.getString("timeout"));
             String params = formData.getString("params");
-            return new SandboxStep(name, duration, params);
+            String sandboxName = formData.getString("sandboxName");
+            return new SandboxStep(name, duration, params, sandboxName, timeout);
         }
 
     }

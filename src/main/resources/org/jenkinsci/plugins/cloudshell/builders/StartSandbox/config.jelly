@@ -9,14 +9,11 @@
     </f:entry>
     Newly created Sandbox Id will be available under $SANDBOX_ID environment variable. Sandbox information will be stored under $SANDBOX_DETAILS environment variable.
             <f:advanced>
-                <f:entry title="${%Timeout if Sandbox unavailable}" field="maxWaitForSandboxAvailability">
+                <f:entry title="${%Timeout if Sandbox unavailable (minuets)}" field="maxWaitForSandboxAvailability">
                       <f:textbox default="10"/>
                 </f:entry>
                 <f:entry title="${%Blueprint Parameters}" field="params">
                   <f:textbox />
-                </f:entry>
-                <f:entry title="${%Sandbox Domain}" field="blueprintDomain">
-                      <f:textbox />
                 </f:entry>
                 <f:entry title="${%Sandbox Name}" field="sandboxName">
                       <f:textbox />
