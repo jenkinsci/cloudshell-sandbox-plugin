@@ -12,7 +12,7 @@
 
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>cloudshell</artifactId>
-  <version>1.5.3</version>
+  <version>1.6.0.${build.number}</version>
   <packaging>hpi</packaging>
 
   <properties>
