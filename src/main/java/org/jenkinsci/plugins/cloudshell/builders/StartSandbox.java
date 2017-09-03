@@ -14,8 +14,10 @@
  */
 package org.jenkinsci.plugins.cloudshell.builders;
 
+import com.google.gson.Gson;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.api.SandboxDetailsResponse;
 import com.quali.cloudshell.qsExceptions.ReserveBluePrintConflictException;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.Extension;
@@ -80,7 +82,8 @@ public class StartSandbox extends CloudShellBuildStep {
 				gateway.TryParseBlueprintParams(params),
 				maxWaitForSandboxAvailability);
 
-		String sandboxDetails = gateway.GetSandboxDetails(sandboxId);
+		Gson gson = new Gson();
+		String sandboxDetails = gson.toJson(gateway.GetSandboxDetails(sandboxId));
 		addSandboxToBuildActions(build, server, sandboxId, sandboxDetails);
 		return true;
 	}
