@@ -20,37 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StepsCommon {
-    public String StartSandbox(TaskListener listener, String name, int duration, StepContext context, String parameters, String sandboxName, int timeout)
+    public String StartSandbox(TaskListener listener, String name, int duration, String parameters, String sandboxName, int timeout)
             throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
-
         SandboxApiGateway gateway = getSandboxApiGateway(listener);
-
-        long startTime = System.currentTimeMillis();
-        while ((System.currentTimeMillis()-startTime) <= timeout * 60 * 1000 ){
-            try {
-                return gateway.StartBlueprint(name, duration, true, (sandboxName.isEmpty()) ? null : sandboxName, parseParams(parameters));
-            }
-            catch (ReserveBluePrintConflictException ce){
-                listener.getLogger().println("Waiting for sandbox to become available...");
-            }
-            Thread.sleep(30*1000);
-        }
-        return null;
-    }
-
-
-    private Map<String, String> parseParams(String params) throws SandboxApiException {
-        if (params != null && !params.isEmpty()) {
-            Map<String, String> map = new HashMap<>();
-            String[] parameters = params.split(";");
-            for (String param: parameters) {
-                String[] split = param.trim().split("=");
-                if (split.length < 2) throw new SandboxApiException("Failed to parse blueprint parameters");
-                map.put(split[0], split[1]);
-            }
-            return map;
-        }
-        return null;
+        return gateway.TryStartBlueprint(name,
+                duration,
+               true,
+               (sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
+               gateway.TryParseBlueprintParams(parameters),
+               timeout);
     }
 
     public void StopSandbox(TaskListener listener, String sandboxId, StepContext context){

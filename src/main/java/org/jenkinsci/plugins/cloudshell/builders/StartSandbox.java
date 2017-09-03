@@ -72,51 +72,16 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
-		return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
-	}
-
-	private boolean TryToReserveWithTimeout(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, QsServerDetails server,
-											long timeout_minutes) throws Exception {
-
-		long startTime = System.currentTimeMillis();
-		while ((System.currentTimeMillis()-startTime) <= timeout_minutes * 60 * 1000 ){
-
-			try {
-				return StartSandBox(build,launcher,listener,server);
-			}
-			catch (ReserveBluePrintConflictException ce){
-				listener.getLogger().println("Waiting for sandbox to become available...");
-			}
-			Thread.sleep(30*1000);
-		}
-		return  false;
-	}
-
-
-	private Map<String, String> parseParams() throws SandboxApiException {
-		if (!params.isEmpty()) {
-			Map<String, String> map = new HashMap<>();
-			String[] parameters = params.split(";");
-			for (String param: parameters) {
-				String[] split = param.trim().split("=");
-				if (split.length < 2) throw new SandboxApiException("Failed to parse blueprint parameters");
-				map.put(split[0], split[1]);
-			}
-			return map;
-		}
-		return null;
-	}
-
-	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
-		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), qsServerDetails);
-		String sandboxId = gateway.StartBlueprint(blueprintName,
-					Integer.parseInt(sandboxDuration),
-					true,
-					(sandboxName.isEmpty()) ? null : sandboxName,
-					parseParams());
+		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server);
+		String sandboxId = gateway.TryStartBlueprint(blueprintName,
+				Integer.parseInt(sandboxDuration),
+				true,
+				(sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
+				gateway.TryParseBlueprintParams(params),
+				maxWaitForSandboxAvailability);
 
 		String sandboxDetails = gateway.GetSandboxDetails(sandboxId);
-		addSandboxToBuildActions(build, qsServerDetails, sandboxId, sandboxDetails);
+		addSandboxToBuildActions(build, server, sandboxId, sandboxDetails);
 		return true;
 	}
 
@@ -127,7 +92,6 @@ public class StartSandbox extends CloudShellBuildStep {
         build.addAction(launchAction);
         launchAction.started(id);
     }
-
 
 	@Extension
 	public static final class startSandboxDescriptor extends CSBuildStepDescriptor {

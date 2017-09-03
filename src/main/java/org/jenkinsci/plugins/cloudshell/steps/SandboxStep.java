@@ -85,7 +85,7 @@ public class SandboxStep extends AbstractStepImpl {
             StepsCommon stepsCommon = new StepsCommon();
             StepContext context = getContext();
             context.newBodyInvoker().
-                    withContext(CreateSandbox(stepsCommon, context)).
+                    withContext(CreateSandbox(stepsCommon)).
                     withContext(EnvironmentExpander.merge(getContext().get(EnvironmentExpander.class), new ExpanderImpl(sandboxId))).
                     withCallback(new Callback(sandboxId, listener)).
                     start();
@@ -101,14 +101,14 @@ public class SandboxStep extends AbstractStepImpl {
             }
         }
 
-        private boolean CreateSandbox(StepsCommon stepsCommon, StepContext context) throws
+        private boolean CreateSandbox(StepsCommon stepsCommon) throws
                 SandboxApiException,
                 NoSuchAlgorithmException,
                 KeyStoreException,
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context, step.params, step.sandboxName, step.timeout);
+            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout);
             return false;
         }
 
