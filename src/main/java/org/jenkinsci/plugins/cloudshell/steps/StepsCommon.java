@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.qsExceptions.InvalidApiCallException;
 import com.quali.cloudshell.qsExceptions.ReserveBluePrintConflictException;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import com.quali.cloudshell.qsExceptions.TeardownFailedException;
@@ -36,7 +37,11 @@ public class StepsCommon {
         try {
             SandboxApiGateway gateway = getSandboxApiGateway(listener);
             gateway.StopSandbox(sandboxId, true);
-            gateway.VerifyTeardownSucceeded(sandboxId);
+            try {
+                gateway.VerifyTeardownSucceeded(sandboxId);
+            } catch (InvalidApiCallException e) {
+                listener.getLogger().println("Teardown process cannot be verified, please use newer version of CloudShell to support this feature.");
+            }
         } catch (TeardownFailedException e) {
             listener.error("Teardown ended with erroes, see sandbox:  " + sandboxId);
             context.setResult(Result.FAILURE);

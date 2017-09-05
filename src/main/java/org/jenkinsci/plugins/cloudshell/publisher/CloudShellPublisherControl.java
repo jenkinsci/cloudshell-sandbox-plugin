@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.cloudshell.publisher;
 
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.qsExceptions.InvalidApiCallException;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import com.quali.cloudshell.qsExceptions.TeardownFailedException;
 import hudson.Extension;
@@ -67,6 +68,8 @@ public class CloudShellPublisherControl extends Recorder implements Serializable
                 try {
                     SandboxApiGateway sandboxApiGateway = new SandboxApiGateway(logger, serverDetails);
                     sandboxApiGateway.VerifyTeardownSucceeded(sandboxId);
+                } catch (InvalidApiCallException e){
+                    listener.getLogger().println("Teardown process cannot be verified, please use newer version of CloudShell to support this feature.");
                 } catch (TeardownFailedException e) {
                     listener.getLogger().println("Teardown ended with erroes, see sandbox:  " + sandboxId);
                     build.setResult(Result.FAILURE);
