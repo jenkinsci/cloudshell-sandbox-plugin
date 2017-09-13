@@ -20,7 +20,7 @@
     <jenkins-test-harness.version>2.2</jenkins-test-harness.version>
   </properties>
 
-  <name>CloudShell Sandbox Plugin for Jenkins CI</name>
+  <name>CloudShell Sandbox Plugin</name>
   <description>CloudShell Sandbox Plugin for Jenkins CI</description>
   <url>http://www.quali.com</url>
 
