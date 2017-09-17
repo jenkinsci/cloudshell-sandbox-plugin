@@ -16,7 +16,7 @@
         <f:entry title="Ignore SSL certificate" field="ignoreSSL">
             <f:checkbox/>
         </f:entry>
-        <f:validateButton title="${%Test Connection}"
+        <f:validateButton title="${%Test connection}"
                                               progress="${%Testing...}"
                                               method="testConnection"
                                               with="serverAddress,user,pw,domain,ignoreSSL"/>

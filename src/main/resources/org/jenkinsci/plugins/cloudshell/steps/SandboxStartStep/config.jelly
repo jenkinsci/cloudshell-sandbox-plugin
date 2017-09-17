@@ -4,18 +4,18 @@
     <f:entry field="name" title="Blueprint Name">
         <f:textbox />
     </f:entry>
-    <f:entry field="duration" title="Sandbox Duration in minuets">
+    <f:entry field="duration" title="Sandbox duration in minutes">
         <f:textbox default="10"/>
     </f:entry>
     <f:advanced>
-        <f:entry field="params" title="Blueprint Parameters">
+        <f:entry field="params" title="Blueprint parameters">
             <f:textbox />
-            Blueprint Parameter in this syntax: "input1=my_name; input2=30"
+            Blueprint parameter in this syntax: "input1=my_name; input2=30"
         </f:entry>
-        <f:entry field="timeout" title="Timeout if Sandbox unavailable (minuets)">
+        <f:entry field="timeout" title="Timeout if sandbox unavailable (minutes)">
             <f:textbox default="10"/>
         </f:entry>
-        <f:entry field="sandboxName" title="Sandbox Name">
+        <f:entry field="sandboxName" title="Sandbox name">
             <f:textbox />
         </f:entry>
     </f:advanced>
