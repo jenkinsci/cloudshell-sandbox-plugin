@@ -1,65 +1,93 @@
-# Sandbox-Jenkins-Plugin
+# CloudShell Sandbox Jenkins Plugin
 
 [![Stories in Ready](https://badge.waffle.io/QualiSystems/Sandbox-Jenkins-Plugin.svg?label=ready&title=Ready)](http://waffle.io/QualiSystems/Sandbox-Jenkins-Plugin)
 [![Dependency Status](https://dependencyci.com/github/QualiSystems/Sandbox-Jenkins-Plugin/badge)](https://dependencyci.com/github/QualiSystems/Sandbox-Jenkins-Plugin)
 
-##Prerequisite
+##Introduction
 
-1) CloudShell 7.0 and above, 'CloudShell Sandbox API' component must be installed.
+The **CloudShell Sandbox Jenkins Plugin** provides an easy way to consume CloudShell sandboxes through Jenkins for a variety of use cases. The plugin allows you to build jobs that create on demand sandboxes in CloudShell based on pre-defined blueprints.
 
-2) Jenkins server 2.0 and above.
+
+##Requirements
+This plugin requires CloudShell 8.0 or later and Jenkins 2.0 or later. 
+Note: Depending on the plugin version, some features may require a specific version of CloudShell. For more details, see the features section.
+
 
 ##Architecture
+The **CloudShell Sandbox Jenkins Plugin** leverages CloudShell sandbox API to perform operations in CloudShell. CloudShell Sandbox API comes out of the box with the CloudShell Suite installation and should be fully installed and configured for the plugin functionality.
+When configuring the CloudShell Sandbox API, you will need to set the API port (82 by default). To see the port, open the **CloudShell Configuration** application and click **CloudShell Sandbox API**. 
 
-1) open port between Jenkins Slaves and the CloudShell Web Server (82 by default but configurable)
+![Alt text](Pics/Configuration Wizard.png?raw=true)
+
+The **Quali Configuration** web interface is displayed, showing the Sandbox API configurations.
+
+![Alt text](Pics/API Config.png?raw=true)
 
 Distributed architecture:
-
 ![Alt text](Pics/Jenkinspluginarchitecture.jpg?raw=true)
 
-## Installation
-1) Download the hpi package from the releases tab
+##Configuration
+After installing the plugin, perform the following steps:
 
-2) Navigate to the advanced section under the plugins tab in jenkins
+1.	Navigate to the main Jenkins configuration page (**Manage Jenkins > Configure System**) and configure the plugin according to your CloudShell installation.
+2.	Set the **CloudShell Sandbox API** Host Address to the machine where CloudShell Sandbox API is installed.
+    Note that this may be a different machine than the Quali Server.
+3.	Specify the credentials (user, password, domain) of the CloudShell user you would like to use for CloudShell operations.
+We recommend creating a new CloudShell admin user for Jenkins.
+4.	To verify your configurations, click the **Test Connection**. Jenkins will to interact with CloudShell to validate connectivity and credentials.
 
-3) Upload the hpi file into the "upload plugin" section
+![Alt text](Pics/Configuration Page.png?raw=true)
 
-4) Restart jenkins
+##Freestyle Steps
+The plugin adds several new steps to Jenkins to streamline interactions with CloudShell sandboxes.
+**CloudShell Build Step** is a generic step that contains CloudShell Actions you can execute. Each action contains several inputs. Currently, the action **Start sandbox** is provided and we plan to support others in the future.
 
-## Configuring CloudShell in Jenkins
-1) Navigate to the main Jenkins settings page
+The **Start Sandbox** action creates a new CloudShell sandbox based on the selected blueprint and restricts interaction with the sandbox while it is running Setup. This ensures the sandbox Setup process completes successfully without any outside interference. When the sandbox is active, the sandbox’s Id and additional information become available in $SANDBOX_ID and $SANDBOX_DETAILS, respectively. These environment variables can be used in other steps in the build.
+Note that the **Sandbox duration in minutes** field specifies the maximum duration of the sandbox. If the build does not end before the specified duration, CloudShell will tear down the sandbox.
+For more information about a field, click that field’s help icon on the right.
 
-2) Fill all fields under "cloudshell configuration" section.
+![Alt text](Pics/Start Sandbox Action.png?raw=true)
 
-![Alt text](Pics/mainsetting.png?raw=true)
+**We recommend using the “Start Sandbox” action as a pre-run step to ensure the sandbox is created before the actual build steps are executed.**
 
-### Adding build steps
-Use a pre-scm step to start a sandbox and a post-build step for stopping running sandboxes.
+Here is an example of how to print the sandbox information for future use:
+![Alt text](Pics/echo Sandbox Information.png?raw=true)
 
-node: make sure to check the "Fail the build on error" when using the pre-scm step, this will fail the build in case the sandbox will fail to create.
+To end the sandboxes that have been created in the build, use the **Stop CloudShell sandboxes** post-build action. Since this is a post-build action, it can be used only once per build and will end all sandboxes created by that build. This step ensures that the sandbox Teardown process completes successfully and checks the sandbox’s Activity Feed to validate that there are no errors in the sandbox activity log.
+![Alt text](Pics/Stop Action.png?raw=true)
 
-Pre-scm step:
+##Pipeline Steps and Syntax
+The plugin installation adds the following pipeline steps to the Jenkins pipeline: 
+  * **startSandbox** – Initiates a new sandbox in CloudShell and waits for the sandbox to complete its Setup process. The method returns the sandbox Id.
+  * **stopSandbox** – Stops an active sandbox, waits for the teardown process to end and checks the sandbox’s Activity Feed for errors.
+  
+Here is an example of how to use the pipeline syntax to execute a Python test that requires the use of a sandbox that is based on a “Performance” blueprint: 
+1.	First, the Performance blueprint is reserved using the parameters passed from Jenkins.
+2.	The sandbox runs the Setup process.
+3.	When this process completes successfully, Jenkins runs the Python code (downloaded from the build VCS) with the sandbox Id. 
+4.	At the end of the test, the plugin initiates the sandbox’s Teardown process using the **stopSandbox** method.
+ 
+ ```
+    stage ('Performance Testing'){
+        Id = startSandbox duration: 13, name: 'Performance', params: 'os=Win; server=4'
+        sh 'python .\Perf2.py --sandbox_id Id'
+        stopSandbox  Id
+    }
+ ```
 
-![Alt text](Pics/PreSCM.png?raw=true)
+Note: The **WithSandbox** step implements the same logic as in **startSandbox** and **stopSandbox** but in a contextual syntax. This step is recommended for demos but not suitable for production.
 
-Build step with parameters and the option to choose specific domain for the blueprint
-![Alt text](Pics/startblueprint80.png?raw=true)
+We recommend using the Jenkins pipeline’s **Snippet Generator** which allows you to compose pipelines with an easy-to-use UI instead of having to write code. For example:
+![Alt text](Pics/Pipeline Snippet.png?raw=true)
 
-Post build step:
+##Features
+This table lists the plugin features that are supported per CloudShell version:
 
-![Alt text](Pics/postBuild.png?raw=true)
-
-### Pipeline support (Workflow) - New!
-The "startSandbox" and "stopSandbox" steps provide an easy way to control the lifecycle of CloudShell 
-sandboxes. You can use these steps to start a sandbox, execute some test code on it, then end it.
-![Alt text](Pics/pipeline.png?raw=true)
-
-### Pipeline Scope Example:
-The "WithSandbox" step provides an alternative syntax which makes it easy to execute some code in the context of a Sandbox.
-The code passed in the closure will be guaranteed to run after the sandbox is up and ready and the sandbox teardown will be taken care
-of automatically upon exiting the scope.
-![Alt text](Pics/PipelineScope.png?raw=true)
+Plugin feature | CloudShell version
+--- | ---
+Blueprint parameters | 8.0 and up
+Activity Feed Teardown validation | 8.1 and up
 
 
-Enjoy
-Tomer
+##Contributing and issues
+The plugin is an open source project under the MIT License. We encourage users to contribute, add pull requests and open issues.
