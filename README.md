@@ -3,17 +3,17 @@
 [![Stories in Ready](https://badge.waffle.io/QualiSystems/Sandbox-Jenkins-Plugin.svg?label=ready&title=Ready)](http://waffle.io/QualiSystems/Sandbox-Jenkins-Plugin)
 [![Dependency Status](https://dependencyci.com/github/QualiSystems/Sandbox-Jenkins-Plugin/badge)](https://dependencyci.com/github/QualiSystems/Sandbox-Jenkins-Plugin)
 
-##Introduction
+## Introduction
 
 The **CloudShell Sandbox Jenkins Plugin** provides an easy way to consume CloudShell sandboxes through Jenkins for a variety of use cases. The plugin allows you to build jobs that create on demand sandboxes in CloudShell based on pre-defined blueprints.
 
 
-##Requirements
+## Requirements
 This plugin requires CloudShell 8.0 or later and Jenkins 2.0 or later. 
 Note: Depending on the plugin version, some features may require a specific version of CloudShell. For more details, see the features section.
 
 
-##Architecture
+## Architecture
 The **CloudShell Sandbox Jenkins Plugin** leverages CloudShell sandbox API to perform operations in CloudShell. CloudShell Sandbox API comes out of the box with the CloudShell Suite installation and should be fully installed and configured for the plugin functionality.
 When configuring the CloudShell Sandbox API, you will need to set the API port (82 by default). To see the port, open the **CloudShell Configuration** application and click **CloudShell Sandbox API**. 
 
@@ -26,7 +26,7 @@ The **Quali Configuration** web interface is displayed, showing the Sandbox API 
 Distributed architecture:
 ![Alt text](Pics/Jenkinspluginarchitecture.jpg?raw=true)
 
-##Configuration
+## Configuration
 After installing the plugin, perform the following steps:
 
 1.	Navigate to the main Jenkins configuration page (**Manage Jenkins > Configure System**) and configure the plugin according to your CloudShell installation.
@@ -38,7 +38,7 @@ We recommend creating a new CloudShell admin user for Jenkins.
 
 ![Alt text](Pics/Configuration Page.png?raw=true)
 
-##Freestyle Steps
+## Freestyle Steps
 The plugin adds several new steps to Jenkins to streamline interactions with CloudShell sandboxes.
 **CloudShell Build Step** is a generic step that contains CloudShell Actions you can execute. Each action contains several inputs. Currently, the action **Start sandbox** is provided and we plan to support others in the future.
 
@@ -56,7 +56,7 @@ Here is an example of how to print the sandbox information for future use:
 To end the sandboxes that have been created in the build, use the **Stop CloudShell sandboxes** post-build action. Since this is a post-build action, it can be used only once per build and will end all sandboxes created by that build. This step ensures that the sandbox Teardown process completes successfully and checks the sandbox’s Activity Feed to validate that there are no errors in the sandbox activity log.
 ![Alt text](Pics/Stop Action.png?raw=true)
 
-##Pipeline Steps and Syntax
+## Pipeline Steps and Syntax
 The plugin installation adds the following pipeline steps to the Jenkins pipeline: 
   * **startSandbox** – Initiates a new sandbox in CloudShell and waits for the sandbox to complete its Setup process. The method returns the sandbox Id.
   * **stopSandbox** – Stops an active sandbox, waits for the teardown process to end and checks the sandbox’s Activity Feed for errors.
@@ -80,7 +80,7 @@ Note: The **WithSandbox** step implements the same logic as in **startSandbox** 
 We recommend using the Jenkins pipeline’s **Snippet Generator** which allows you to compose pipelines with an easy-to-use UI instead of having to write code. For example:
 ![Alt text](Pics/Pipeline Snippet.png?raw=true)
 
-##Features
+## Features
 This table lists the plugin features that are supported per CloudShell version:
 
 Plugin feature | CloudShell version
@@ -89,5 +89,5 @@ Blueprint parameters | 8.0 and up
 Activity Feed Teardown validation | 8.1 and up
 
 
-##Contributing and issues
+## Contributing and issues
 The plugin is an open source project under the MIT License. We encourage users to contribute, add pull requests and open issues.
