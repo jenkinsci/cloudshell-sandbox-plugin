@@ -14,10 +14,12 @@
  */
 package org.jenkinsci.plugins.cloudshell.builders;
 
-import com.quali.cloudshell.QsExceptions.ReserveBluePrintConflictException;
-import com.quali.cloudshell.QsExceptions.SandboxApiException;
+import com.google.gson.Gson;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.api.SandboxDetailsResponse;
+import com.quali.cloudshell.qsExceptions.ReserveBluePrintConflictException;
+import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -28,68 +30,61 @@ import org.jenkinsci.plugins.cloudshell.VariableInjectionAction;
 import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StartSandbox extends CloudShellBuildStep {
 
 	private final String blueprintName;
 	private final String sandboxDuration;
+	private final String params;
+	private final String sandboxDomain;
 	private final int maxWaitForSandboxAvailability;
+	private final String sandboxName;
 
 	@DataBoundConstructor
-	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability) {
+	public StartSandbox(String blueprintName, String sandboxDuration, String sandboxDomain, int maxWaitForSandboxAvailability, String params, String sandboxName) {
 		this.blueprintName = blueprintName;
 		this.sandboxDuration = sandboxDuration;
+		this.sandboxDomain = sandboxDomain;
 		this.maxWaitForSandboxAvailability = maxWaitForSandboxAvailability;
+		this.params = params;
+		this.sandboxName = sandboxName;
 	}
 
 	public String getBlueprintName() {
 		return blueprintName;
 	}
-
 	public String getSandboxDuration() {
 		return sandboxDuration;
 	}
-
 	public int getMaxWaitForSandboxAvailability() {
 		return maxWaitForSandboxAvailability;
 	}
+	public String getParams() { return params; }
+	public String getSandboxName() {
+		return sandboxName;
+	}
+	public String getSandboxDomain() {
+		return sandboxDomain;
+	}
 
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
-		return TryToReserveWithTimeout(build, launcher, listener, server, maxWaitForSandboxAvailability);
-	}
+		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server);
+		String sandboxId = gateway.TryStartBlueprint(blueprintName,
+				Integer.parseInt(sandboxDuration),
+				true,
+				(sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
+				gateway.TryParseBlueprintParams(params),
+				maxWaitForSandboxAvailability);
 
-	private boolean TryToReserveWithTimeout(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, QsServerDetails server,
-											long timeout_minutes) throws Exception {
-
-		long startTime = System.currentTimeMillis();
-		while ((System.currentTimeMillis()-startTime) <= timeout_minutes * 60 * 1000 ){
-
-			try {
-				return StartSandBox(build,launcher,listener,server);
-			}
-			catch (ReserveBluePrintConflictException ce){
-				listener.getLogger().println("Waiting for sandbox to become available...");
-			}
-			catch (Exception e){
-				throw e;
-			}
-			Thread.sleep(30*1000);
-
-		}
-
-		return  false;
-	}
-
-
-	private boolean StartSandBox(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails qsServerDetails) throws UnsupportedEncodingException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, SandboxApiException {
-		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), qsServerDetails);
-        String sandboxId = gateway.startBlueprint(blueprintName, Integer.parseInt(sandboxDuration), true, null);
-        String sandboxDetails = gateway.GetSandboxDetails(sandboxId);
-        addSandboxToBuildActions(build, qsServerDetails, sandboxId, sandboxDetails);
+		Gson gson = new Gson();
+		String sandboxDetails = gson.toJson(gateway.GetSandboxDetails(sandboxId));
+		addSandboxToBuildActions(build, server, sandboxId, sandboxDetails);
 		return true;
 	}
 
@@ -101,8 +96,7 @@ public class StartSandbox extends CloudShellBuildStep {
         launchAction.started(id);
     }
 
-
-    @Extension
+	@Extension
 	public static final class startSandboxDescriptor extends CSBuildStepDescriptor {
 
 		public startSandboxDescriptor() {

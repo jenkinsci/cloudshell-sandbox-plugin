@@ -14,12 +14,18 @@ import javax.annotation.Nonnull;
 public class SandboxStartStep extends AbstractStepImpl {
 
     public final String name;
-    public final int maxDuration;
+    public final String params;
+    public final String sandboxName;
+    public final int duration;
+    public final int timeout;
 
     @DataBoundConstructor
-    public SandboxStartStep(@Nonnull String name, @Nonnull int maxDuration) {
+    public SandboxStartStep(@Nonnull String name, String params, String sandboxName, int duration, int timeout) {
         this.name = name;
-        this.maxDuration = maxDuration;
+        this.params = params;
+        this.sandboxName = sandboxName;
+        this.duration = duration;
+        this.timeout = timeout;
     }
 
     @Extension
@@ -48,7 +54,7 @@ public class SandboxStartStep extends AbstractStepImpl {
         @Override
         protected String run() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-            return stepsCommon.StartSandbox(listener, step.name, step.maxDuration, getContext());
+            return stepsCommon.StartSandbox(listener, step.name, step.duration ,step.params, step.sandboxName, step.timeout);
         }
 
         private static final long serialVersionUID = 1L;

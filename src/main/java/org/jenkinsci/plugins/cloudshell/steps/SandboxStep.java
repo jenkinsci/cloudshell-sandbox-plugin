@@ -25,7 +25,7 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
-import com.quali.cloudshell.QsExceptions.SandboxApiException;
+import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.TaskListener;
@@ -40,18 +40,24 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SandboxStep extends AbstractStepImpl {
 
     public final String name;
     public final int maxDuration;
+    public final String params;
+    public final String sandboxName;
+    public final int timeout;
 
+    @Deprecated
     @DataBoundConstructor
-    public SandboxStep(@Nonnull String name, @Nonnull int maxDuration) {
+    public SandboxStep(@Nonnull String name, int maxDuration, String params, String sandboxName, int timeout) {
         this.name = name;
         this.maxDuration = maxDuration;
+        this.params = params;
+        this.sandboxName = sandboxName;
+        this.timeout = timeout;
     }
 
     public String getName() {
@@ -79,7 +85,7 @@ public class SandboxStep extends AbstractStepImpl {
             StepsCommon stepsCommon = new StepsCommon();
             StepContext context = getContext();
             context.newBodyInvoker().
-                    withContext(CreateSandbox(stepsCommon, context)).
+                    withContext(CreateSandbox(stepsCommon)).
                     withContext(EnvironmentExpander.merge(getContext().get(EnvironmentExpander.class), new ExpanderImpl(sandboxId))).
                     withCallback(new Callback(sandboxId, listener)).
                     start();
@@ -91,20 +97,18 @@ public class SandboxStep extends AbstractStepImpl {
             listener.getLogger().println("Aborting CloudShell Sandbox!");
             if (sandboxId != null && !sandboxId.isEmpty())
             {
-                StepsCommon stepsCommon = new StepsCommon();
-                stepsCommon.StopSandbox(listener, sandboxId);
+                new StepsCommon().StopSandbox(listener, sandboxId, getContext());
             }
-
         }
 
-        private boolean CreateSandbox(StepsCommon stepsCommon, StepContext context) throws
+        private boolean CreateSandbox(StepsCommon stepsCommon) throws
                 SandboxApiException,
                 NoSuchAlgorithmException,
                 KeyStoreException,
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, context);
+            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout);
             return false;
         }
 
@@ -121,17 +125,7 @@ public class SandboxStep extends AbstractStepImpl {
 
             private void stopSandbox(StepContext context) {
                 StepsCommon stepsCommon = new StepsCommon();
-                try {
-                    stepsCommon.StopSandbox(listener, sandboxId);
-                } catch (SandboxApiException e) {
-                    e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                } catch (KeyStoreException e) {
-                    e.printStackTrace();
-                } catch (KeyManagementException e) {
-                    e.printStackTrace();
-                }
+                stepsCommon.StopSandbox(listener, sandboxId, context);
             }
 
             @Override
@@ -156,7 +150,7 @@ public class SandboxStep extends AbstractStepImpl {
             this.overrides = new HashMap<>();
             this.overrides.put("SANDBOX_ID", sandboxId);
         }
-        @Override public void expand(EnvVars env) throws IOException, InterruptedException {
+        @Override public void expand(@Nonnull EnvVars env) throws IOException, InterruptedException {
             env.overrideAll(overrides);
         }
     }
@@ -174,6 +168,7 @@ public class SandboxStep extends AbstractStepImpl {
             return "withSandbox";
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Use sandbox in a specific scope";
@@ -188,8 +183,11 @@ public class SandboxStep extends AbstractStepImpl {
         public Step newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             //TODO: throw nice errors if needed
             String name = formData.getString("name");
-            int duration = Integer.parseInt(formData.getString("maxDuration"));
-            return new SandboxStep(name, duration);
+            int duration = Integer.parseInt(formData.getString("duration"));
+            int timeout = Integer.parseInt(formData.getString("timeout"));
+            String params = formData.getString("params");
+            String sandboxName = formData.getString("sandboxName");
+            return new SandboxStep(name, duration, params, sandboxName, timeout);
         }
 
     }

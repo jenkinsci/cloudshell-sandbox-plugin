@@ -10,9 +10,8 @@
     <relativePath/>
   </parent>
 
-  <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>cloudshell</artifactId>
-  <version>1.5.1</version>
+  <version>1.6.0.${build.number}</version>
   <packaging>hpi</packaging>
 
   <properties>
@@ -21,7 +20,7 @@
     <jenkins-test-harness.version>2.2</jenkins-test-harness.version>
   </properties>
 
-  <name>CloudShell Sandbox Plugin for Jenkins CI</name>
+  <name>CloudShell Sandbox Plugin</name>
   <description>CloudShell Sandbox Plugin for Jenkins CI</description>
   <url>http://www.quali.com</url>
 
@@ -45,7 +44,15 @@
       <id>repo.jenkins-ci.org</id>
       <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
+
+    <repository>
+      <id>snapshots-repo</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases><enabled>false</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
+    </repository>
   </repositories>
+
   <pluginRepositories>
     <pluginRepository>
       <id>repo.jenkins-ci.org</id>
@@ -54,6 +61,13 @@
   </pluginRepositories>
 
   <dependencies>
+
+    <dependency>
+      <groupId>com.quali.cloudshell</groupId>
+      <artifactId>sandbox-api</artifactId>
+      <version>1.1.0.8</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -120,11 +134,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.quali.cloudshell</groupId>
-      <artifactId>sandbox-api</artifactId>
-      <version>1.0.3</version>
-    </dependency>
 
   </dependencies>
 

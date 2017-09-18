@@ -14,6 +14,8 @@
  */
 package org.jenkinsci.plugins.cloudshell;
 import com.quali.cloudshell.QsServerDetails;
+import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.Launcher;
@@ -25,10 +27,18 @@ import hudson.model.BuildListener;
 import hudson.model.Items;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep.CSBuildStepDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 public class CloudShellConfig extends Builder {
 
@@ -78,6 +88,57 @@ public class CloudShellConfig extends Builder {
 					CloudShellConfig.class
 			);
 		}
+
+		public FormValidation doTestConnection(
+				@QueryParameter("serverAddress") final String serverAddress,
+				@QueryParameter("user") final String user,
+				@QueryParameter("pw") final String pw,
+				@QueryParameter("domain") final String domain,
+				@QueryParameter("ignoreSSL") final boolean ignoreSSL ){
+					try {
+						SandboxApiGateway gateway = new SandboxApiGateway(null, new QsServerDetails(serverAddress, user, pw, domain, ignoreSSL));
+						gateway.TryLogin();
+					} catch (SandboxApiException | KeyStoreException | KeyManagementException | NoSuchAlgorithmException e) {
+						return FormValidation.error(e.getMessage());
+					} catch (UnknownHostException e) {
+						return FormValidation.error("Unknown Host: " + e.getMessage());
+					} catch (IOException e) {
+						return FormValidation.error(e.getMessage());
+					}
+            return FormValidation.ok("Test completed successfully");
+		}
+
+		public FormValidation doCheckPw(@QueryParameter String value) {
+			if(value.isEmpty())
+				return FormValidation.errorWithMarkup("Password cannot be empty");
+			else
+				return FormValidation.ok();
+		}
+
+		public FormValidation doCheckUser(@QueryParameter String value) {
+			if(value.isEmpty())
+				return FormValidation.errorWithMarkup("User cannot be empty");
+			else
+				return FormValidation.ok();
+		}
+
+		public FormValidation doCheckDomain(@QueryParameter String value) {
+			if(value.isEmpty())
+				return FormValidation.errorWithMarkup("Domain cannot be empty");
+			else
+				return FormValidation.ok();
+		}
+
+
+		public FormValidation doCheckServerAddress(@QueryParameter String value) {
+//			String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+			String regex = "^(https?)://[-a-zA-Z0-9-_.:]*[0-9]";
+			if(value.matches(regex))
+				return FormValidation.ok();
+			else
+				return FormValidation.errorWithMarkup("Invalid server address, see help for more details");
+		}
+
 
 		@Override
 		public String getDisplayName() {

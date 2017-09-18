@@ -1,53 +1,61 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
-import com.quali.cloudshell.QsExceptions.SandboxApiException;
-import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
-import hudson.EnvVars;
+import com.quali.cloudshell.qsExceptions.InvalidApiCallException;
+import com.quali.cloudshell.qsExceptions.ReserveBluePrintConflictException;
+import com.quali.cloudshell.qsExceptions.SandboxApiException;
+import com.quali.cloudshell.qsExceptions.TeardownFailedException;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep;
 import org.jenkinsci.plugins.cloudshell.CloudShellConfig;
 import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
-import org.jenkinsci.plugins.workflow.steps.EnvironmentExpander;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class StepsCommon {
-    public String StartSandbox(TaskListener listener, String name, int duration, StepContext context) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
-        listener.getLogger().println("CloudShell Starting!");
+    public String StartSandbox(TaskListener listener, String name, int duration, String parameters, String sandboxName, int timeout)
+            throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
         SandboxApiGateway gateway = getSandboxApiGateway(listener);
+        return gateway.TryStartBlueprint(name,
+                duration,
+               true,
+               (sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
+               gateway.TryParseBlueprintParams(parameters),
+               timeout);
+    }
 
-        String sandboxName = null;
-        EnvVars envVars = context.get(EnvVars.class);
-        String jobName = envVars.get("JOB_NAME");
-        if (jobName != null && !jobName.isEmpty())
-        {
-            sandboxName = jobName + "_" + java.util.UUID.randomUUID().toString().substring(0, 5);;
+    public void StopSandbox(TaskListener listener, String sandboxId, StepContext context){
+        listener.getLogger().println("Sandbox plugin:  Sandbox Cleanup in progress");
+        try {
+            SandboxApiGateway gateway = getSandboxApiGateway(listener);
+            gateway.StopSandbox(sandboxId, true);
+            try {
+                gateway.VerifyTeardownSucceeded(sandboxId);
+            } catch (InvalidApiCallException e) {
+                listener.getLogger().println("Teardown process cannot be verified, please use newer version of CloudShell to support this feature.");
+            }
+        } catch (TeardownFailedException e) {
+            listener.error("Teardown ended with erroes, see sandbox:  " + sandboxId);
+            context.setResult(Result.FAILURE);
+        } catch (SandboxApiException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+           listener.error("Failed to stop sandbox:  " + e.getMessage() + ". \n" + Arrays.toString(e.getStackTrace()));
+           context.setResult(Result.FAILURE);
         }
-        String sandboxId = gateway.startBlueprint(name, duration, true, sandboxName);
-        return sandboxId;
     }
 
-    public void StopSandbox(TaskListener listener, String sandboxId) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        listener.getLogger().println("CloudShell Stop Starting!");
-        SandboxApiGateway gateway = getSandboxApiGateway(listener);
-        gateway.StopSandbox(sandboxId, true);
-    }
-
-    private SandboxApiGateway getSandboxApiGateway(TaskListener listener) {
+    private SandboxApiGateway getSandboxApiGateway(TaskListener listener) throws SandboxApiException {
         CloudShellConfig.DescriptorImpl descriptorImpl =
                 (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
-        QsServerDetails server = descriptorImpl.getServer();
-        QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
-        return new SandboxApiGateway(logger, server);
+        return new SandboxApiGateway(
+                new QsJenkinsTaskLogger(listener),
+                descriptorImpl.getServer());
     }
 }
