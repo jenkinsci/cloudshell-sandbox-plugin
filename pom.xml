@@ -65,7 +65,7 @@
     <dependency>
       <groupId>com.quali.cloudshell</groupId>
       <artifactId>sandbox-api</artifactId>
-      <version>1.1.0.8-SNAPSHOT</version>
+      <version>1.1.0.8</version>
     </dependency>
 
     <dependency>
