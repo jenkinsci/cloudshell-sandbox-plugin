@@ -17,11 +17,11 @@ Note: Depending on the plugin version, some features may require a specific vers
 The **CloudShell Sandbox Jenkins Plugin** leverages CloudShell sandbox API to perform operations in CloudShell. CloudShell Sandbox API comes out of the box with the CloudShell Suite installation and should be fully installed and configured for the plugin functionality.
 When configuring the CloudShell Sandbox API, you will need to set the API port (82 by default). To see the port, open the **CloudShell Configuration** application and click **CloudShell Sandbox API**. 
 
-![Alt text](Pics/Configuration Wizard.png?raw=true)
+![Alt text](Pics/ConfigurationWizard.png?raw=true)
 
 The **Quali Configuration** web interface is displayed, showing the Sandbox API configurations.
 
-![Alt text](Pics/API Config.png?raw=true)
+![Alt text](Pics/APIConfig.png?raw=true)
 
 Distributed architecture:
 ![Alt text](Pics/Jenkinspluginarchitecture.jpg?raw=true)
@@ -36,7 +36,7 @@ After installing the plugin, perform the following steps:
 We recommend creating a new CloudShell admin user for Jenkins.
 4.	To verify your configurations, click the **Test Connection**. Jenkins will to interact with CloudShell to validate connectivity and credentials.
 
-![Alt text](Pics/Configuration Page.png?raw=true)
+![Alt text](Pics/ConfigurationPage.png?raw=true)
 
 ## Freestyle Steps
 The plugin adds several new steps to Jenkins to streamline interactions with CloudShell sandboxes.
@@ -46,15 +46,15 @@ The **Start Sandbox** action creates a new CloudShell sandbox based on the selec
 Note that the **Sandbox duration in minutes** field specifies the maximum duration of the sandbox. If the build does not end before the specified duration, CloudShell will tear down the sandbox.
 For more information about a field, click that field’s help icon on the right.
 
-![Alt text](Pics/Start Sandbox Action.png?raw=true)
+![Alt text](Pics/StartSandboxAction.png?raw=true)
 
 **We recommend using the “Start Sandbox” action as a pre-run step to ensure the sandbox is created before the actual build steps are executed.**
 
 Here is an example of how to print the sandbox information for future use:
-![Alt text](Pics/echo Sandbox Information.png?raw=true)
+![Alt text](Pics/echoSandboxInformation.png?raw=true)
 
 To end the sandboxes that have been created in the build, use the **Stop CloudShell sandboxes** post-build action. Since this is a post-build action, it can be used only once per build and will end all sandboxes created by that build. This step ensures that the sandbox Teardown process completes successfully and checks the sandbox’s Activity Feed to validate that there are no errors in the sandbox activity log.
-![Alt text](Pics/Stop Action.png?raw=true)
+![Alt text](Pics/StopAction.png?raw=true)
 
 ## Pipeline Steps and Syntax
 The plugin installation adds the following pipeline steps to the Jenkins pipeline: 
@@ -78,7 +78,7 @@ Here is an example of how to use the pipeline syntax to execute a Python test th
 Note: The **WithSandbox** step implements the same logic as in **startSandbox** and **stopSandbox** but in a contextual syntax. This step is recommended for demos but not suitable for production.
 
 We recommend using the Jenkins pipeline’s **Snippet Generator** which allows you to compose pipelines with an easy-to-use UI instead of having to write code. For example:
-![Alt text](Pics/Pipeline Snippet.png?raw=true)
+![Alt text](Pics/PipelineSnippet.png?raw=true)
 
 ## Features
 This table lists the plugin features that are supported per CloudShell version:
