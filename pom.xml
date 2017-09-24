@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>cloudshell-sandbox</artifactId>
-  <version>1.6.0.${build.number}</version>
+  <version>1.6.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <properties>
@@ -22,7 +22,7 @@
 
   <name>CloudShell Sandbox Plugin</name>
   <description>CloudShell Sandbox Plugin for Jenkins CI</description>
-  <url>http://www.quali.com</url>
+  <url>https://wiki.jenkins.io/display/JENKINS/CloudShell+Sandbox+Plugin</url>
 
   <licenses>
     <license>
@@ -35,7 +35,6 @@
     <developer>
       <name>Tomer Admon</name>
       <email>tomer.a@quali.com</email>
-      <organization>Quali</organization>
     </developer>
   </developers>
 
