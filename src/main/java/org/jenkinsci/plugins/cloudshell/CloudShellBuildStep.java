@@ -17,7 +17,6 @@ package org.jenkinsci.plugins.cloudshell;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
 import hudson.DescriptorExtensionList;
-import hudson.ExtensionPoint;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -27,10 +26,10 @@ import jenkins.model.Jenkins;
 
 public abstract class CloudShellBuildStep implements Describable<CloudShellBuildStep> {
 
-	protected SandboxApiGateway CsServer;
+	protected SandboxApiGateway csServer;
 
 	public SandboxApiGateway getCsServer() {
-		return CsServer;
+		return csServer;
 	}
 
 	public static DescriptorExtensionList<CloudShellBuildStep, CSBuildStepDescriptor> all() {

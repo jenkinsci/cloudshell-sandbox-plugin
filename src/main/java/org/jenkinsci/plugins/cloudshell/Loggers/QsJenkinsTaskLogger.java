@@ -13,15 +13,15 @@ public class QsJenkinsTaskLogger extends QsLogger {
     }
 
     @Override
-    public void Debug(String s) {
+    public void debug(String s) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void Info(String s) {
+    public void info(String s) {
         listener.getLogger().println(s);
     }
 
     @Override
-    public void Error(String s) { listener.error(s);}
+    public void error(String s) { listener.error(s);}
 }

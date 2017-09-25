@@ -54,7 +54,7 @@ public class SandboxStartStep extends AbstractStepImpl {
         @Override
         protected String run() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-            return stepsCommon.StartSandbox(listener, step.name, step.duration ,step.params, step.sandboxName, step.timeout);
+            return stepsCommon.startSandbox(listener, step.name, step.duration ,step.params, step.sandboxName, step.timeout);
         }
 
         private static final long serialVersionUID = 1L;

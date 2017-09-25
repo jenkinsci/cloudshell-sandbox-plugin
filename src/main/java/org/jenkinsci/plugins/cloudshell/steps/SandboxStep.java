@@ -97,7 +97,7 @@ public class SandboxStep extends AbstractStepImpl {
             listener.getLogger().println("Aborting CloudShell Sandbox!");
             if (sandboxId != null && !sandboxId.isEmpty())
             {
-                new StepsCommon().StopSandbox(listener, sandboxId, getContext());
+                new StepsCommon().stopSandbox(listener, sandboxId, getContext());
             }
         }
 
@@ -108,7 +108,7 @@ public class SandboxStep extends AbstractStepImpl {
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            sandboxId = stepsCommon.StartSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout);
+            sandboxId = stepsCommon.startSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout);
             return false;
         }
 
@@ -125,7 +125,7 @@ public class SandboxStep extends AbstractStepImpl {
 
             private void stopSandbox(StepContext context) {
                 StepsCommon stepsCommon = new StepsCommon();
-                stepsCommon.StopSandbox(listener, sandboxId, context);
+                stepsCommon.stopSandbox(listener, sandboxId, context);
             }
 
             @Override

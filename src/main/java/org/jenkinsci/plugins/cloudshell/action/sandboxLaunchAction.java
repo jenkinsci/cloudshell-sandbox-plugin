@@ -6,12 +6,12 @@ import hudson.model.Action;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class SandboxLaunchAction implements Action, Serializable, Cloneable{
+public class sandboxLaunchAction implements Action, Serializable {
 
     private QsServerDetails serverDetails;
     private ArrayList<String> runningSandboxes = new ArrayList<String>();
 
-    public SandboxLaunchAction(QsServerDetails serverDetails){
+    public sandboxLaunchAction(QsServerDetails serverDetails){
 
         this.serverDetails = serverDetails;
     }

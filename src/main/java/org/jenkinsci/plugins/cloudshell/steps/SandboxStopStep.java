@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
-import hudson.AbortException;
 import hudson.Extension;
-import hudson.model.Result;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -51,7 +49,7 @@ public class SandboxStopStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-            stepsCommon.StopSandbox(listener, step.reservationId, getContext());
+            stepsCommon.stopSandbox(listener, step.reservationId, getContext());
             return null;
         }
     }

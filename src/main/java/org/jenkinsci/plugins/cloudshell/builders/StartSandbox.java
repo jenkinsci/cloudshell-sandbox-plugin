@@ -17,9 +17,6 @@ package org.jenkinsci.plugins.cloudshell.builders;
 import com.google.gson.Gson;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
-import com.quali.cloudshell.api.SandboxDetailsResponse;
-import com.quali.cloudshell.qsExceptions.ReserveBluePrintConflictException;
-import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -27,15 +24,8 @@ import hudson.model.BuildListener;
 import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep;
 import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
 import org.jenkinsci.plugins.cloudshell.VariableInjectionAction;
-import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
+import org.jenkinsci.plugins.cloudshell.action.sandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class StartSandbox extends CloudShellBuildStep {
 
@@ -91,15 +81,15 @@ public class StartSandbox extends CloudShellBuildStep {
     private void addSandboxToBuildActions(AbstractBuild<?, ?> build, QsServerDetails serverDetails, String id, String sandboxDetails) {
         build.addAction(new VariableInjectionAction("SANDBOX_ID",id));
 		build.addAction(new VariableInjectionAction("SANDBOX_DETAILS",sandboxDetails));
-        SandboxLaunchAction launchAction = new SandboxLaunchAction(serverDetails);
+        sandboxLaunchAction launchAction = new sandboxLaunchAction(serverDetails);
         build.addAction(launchAction);
         launchAction.started(id);
     }
 
 	@Extension
-	public static final class startSandboxDescriptor extends CSBuildStepDescriptor {
+	public static final class StartSandboxDescriptor extends CSBuildStepDescriptor {
 
-		public startSandboxDescriptor() {
+		public StartSandboxDescriptor() {
 			load();
 		}
 

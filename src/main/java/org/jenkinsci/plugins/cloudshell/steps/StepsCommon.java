@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StepsCommon {
-    public String StartSandbox(TaskListener listener, String name, int duration, String parameters, String sandboxName, int timeout)
+    public String startSandbox(TaskListener listener, String name, int duration, String parameters, String sandboxName, int timeout)
             throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
         SandboxApiGateway gateway = getSandboxApiGateway(listener);
         return gateway.TryStartBlueprint(name,
@@ -32,7 +32,7 @@ public class StepsCommon {
                timeout);
     }
 
-    public void StopSandbox(TaskListener listener, String sandboxId, StepContext context){
+    public void stopSandbox(TaskListener listener, String sandboxId, StepContext context){
         listener.getLogger().println("Sandbox plugin:  Sandbox Cleanup in progress");
         try {
             SandboxApiGateway gateway = getSandboxApiGateway(listener);

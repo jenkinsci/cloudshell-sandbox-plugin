@@ -16,7 +16,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
-import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
+import org.jenkinsci.plugins.cloudshell.action.sandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -50,10 +50,10 @@ public class CloudShellPublisherControl extends Recorder implements Serializable
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        List<SandboxLaunchAction> sandboxLaunchActions = build.getActions(SandboxLaunchAction.class);
+        List<sandboxLaunchAction> sandboxLaunchActions = build.getActions(sandboxLaunchAction.class);
         QsJenkinsTaskLogger logger = new QsJenkinsTaskLogger(listener);
 
-        for (SandboxLaunchAction sandboxItem : sandboxLaunchActions) {
+        for (sandboxLaunchAction sandboxItem : sandboxLaunchActions) {
             QsServerDetails serverDetails = sandboxItem.getServerDetails();
             for (String sandboxId : sandboxItem.getRunning()) {
                 try {
