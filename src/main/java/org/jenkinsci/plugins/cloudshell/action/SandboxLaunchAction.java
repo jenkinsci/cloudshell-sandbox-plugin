@@ -3,15 +3,14 @@ package org.jenkinsci.plugins.cloudshell.action;
 import com.quali.cloudshell.QsServerDetails;
 import hudson.model.Action;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class sandboxLaunchAction implements Action, Serializable {
+public class SandboxLaunchAction implements Action {
 
     private QsServerDetails serverDetails;
     private ArrayList<String> runningSandboxes = new ArrayList<String>();
 
-    public sandboxLaunchAction(QsServerDetails serverDetails){
+    public SandboxLaunchAction(QsServerDetails serverDetails){
 
         this.serverDetails = serverDetails;
     }

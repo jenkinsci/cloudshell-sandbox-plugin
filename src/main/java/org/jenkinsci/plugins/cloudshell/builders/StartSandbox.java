@@ -24,7 +24,7 @@ import hudson.model.BuildListener;
 import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep;
 import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
 import org.jenkinsci.plugins.cloudshell.VariableInjectionAction;
-import org.jenkinsci.plugins.cloudshell.action.sandboxLaunchAction;
+import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class StartSandbox extends CloudShellBuildStep {
@@ -81,7 +81,7 @@ public class StartSandbox extends CloudShellBuildStep {
     private void addSandboxToBuildActions(AbstractBuild<?, ?> build, QsServerDetails serverDetails, String id, String sandboxDetails) {
         build.addAction(new VariableInjectionAction("SANDBOX_ID",id));
 		build.addAction(new VariableInjectionAction("SANDBOX_DETAILS",sandboxDetails));
-        sandboxLaunchAction launchAction = new sandboxLaunchAction(serverDetails);
+        SandboxLaunchAction launchAction = new SandboxLaunchAction(serverDetails);
         build.addAction(launchAction);
         launchAction.started(id);
     }
