@@ -24,6 +24,12 @@
   <description>CloudShell Sandbox Plugin for Jenkins CI</description>
   <url>https://wiki.jenkins.io/display/JENKINS/CloudShell+Sandbox+Plugin</url>
 
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/cloudshell-sandbox-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/cloudshell-sandbox-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/cloudshell-sandbox-plugin</url>
+  </scm>
+
   <licenses>
     <license>
       <name>MIT License</name>
