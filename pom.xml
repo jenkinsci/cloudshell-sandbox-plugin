@@ -25,7 +25,7 @@
 
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/cloudshell-sandbox-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/cloudshell-sandbox-plugin.git</developerConnection>
+    <developerConnection>scm:git:git@github.com/jenkinsci/cloudshell-sandbox-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/cloudshell-sandbox-plugin</url>
   </scm>
 
