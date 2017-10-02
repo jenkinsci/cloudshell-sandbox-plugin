@@ -12,6 +12,8 @@ The **CloudShell Sandbox Jenkins Plugin** provides an easy way to consume CloudS
 This plugin requires CloudShell 8.0 or later and Jenkins 2.0 or later. 
 Note: Depending on the plugin version, some features may require a specific version of CloudShell. For more details, see the features section.
 
+## Installation
+The CloudShell Sandbox Jenkins Plugin is available for download directly from Jenkins’ Plugin Manager (Manage Jenkins > Plugin Manager) in the Jenkins UI. 
 
 ## Architecture
 The **CloudShell Sandbox Jenkins Plugin** leverages CloudShell sandbox API to perform operations in CloudShell. CloudShell Sandbox API comes out of the box with the CloudShell Suite installation and should be fully installed and configured for the plugin functionality.
