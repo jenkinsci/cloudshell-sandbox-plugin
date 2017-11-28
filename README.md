@@ -7,4 +7,4 @@
 
 The **CloudShell Sandbox Jenkins Plugin** provides an easy way to consume CloudShell sandboxes through Jenkins for a variety of use cases. The plugin allows you to build jobs that create on demand sandboxes in CloudShell based on pre-defined blueprints.
 
-For detailed information on the plugin's architecture and usage, see the [CloudShell Sandbox Plugin](https://wiki.jenkins.io/display/JENKINS/CloudShell+Sandbox+Plugin) Jenkins wiki page.
+For detailed information on the plugin's architecture and usage, see the [CloudShell Sandbox Plugin](https://plugins.jenkins.io/cloudshell-sandbox) Jenkins wiki page.
