@@ -48,15 +48,17 @@ public class SandboxStep extends AbstractStepImpl {
     public final int maxDuration;
     public final String params;
     public final String sandboxName;
+    public final String sandboxDomain;
     public final int timeout;
 
     @Deprecated
     @DataBoundConstructor
-    public SandboxStep(@Nonnull String name, int maxDuration, String params, String sandboxName, int timeout) {
+    public SandboxStep(@Nonnull String name, int maxDuration, String params, String sandboxName, String sandboxDomain, int timeout) {
         this.name = name;
         this.maxDuration = maxDuration;
         this.params = params;
         this.sandboxName = sandboxName;
+        this.sandboxDomain = sandboxDomain;
         this.timeout = timeout;
     }
 
@@ -187,7 +189,8 @@ public class SandboxStep extends AbstractStepImpl {
             int timeout = Integer.parseInt(formData.getString("timeout"));
             String params = formData.getString("params");
             String sandboxName = formData.getString("sandboxName");
-            return new SandboxStep(name, duration, params, sandboxName, timeout);
+            String sandboxDomain = formData.getString("sandboxDomain");
+            return new SandboxStep(name, duration, params, sandboxName, sandboxDomain, timeout);
         }
 
     }

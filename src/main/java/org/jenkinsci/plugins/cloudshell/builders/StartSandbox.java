@@ -19,6 +19,7 @@ import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import org.jenkinsci.plugins.cloudshell.CloudShellBuildStep;
@@ -26,24 +27,28 @@ import org.jenkinsci.plugins.cloudshell.Loggers.QsJenkinsTaskLogger;
 import org.jenkinsci.plugins.cloudshell.VariableInjectionAction;
 import org.jenkinsci.plugins.cloudshell.action.SandboxLaunchAction;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+
+import javax.annotation.CheckForNull;
 
 public class StartSandbox extends CloudShellBuildStep {
 
 	private final String blueprintName;
 	private final String sandboxDuration;
-	private final String params;
-	private final String sandboxDomain;
 	private final int maxWaitForSandboxAvailability;
-	private final String sandboxName;
+
+	@CheckForNull
+	private String sandboxDomain;
+	@CheckForNull
+	private String sandboxName;
+	@CheckForNull
+	private String params;
 
 	@DataBoundConstructor
-	public StartSandbox(String blueprintName, String sandboxDuration, String sandboxDomain, int maxWaitForSandboxAvailability, String params, String sandboxName) {
+	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability) {
 		this.blueprintName = blueprintName;
 		this.sandboxDuration = sandboxDuration;
-		this.sandboxDomain = sandboxDomain;
 		this.maxWaitForSandboxAvailability = maxWaitForSandboxAvailability;
-		this.params = params;
-		this.sandboxName = sandboxName;
 	}
 
 	public String getBlueprintName() {
@@ -55,15 +60,44 @@ public class StartSandbox extends CloudShellBuildStep {
 	public int getMaxWaitForSandboxAvailability() {
 		return maxWaitForSandboxAvailability;
 	}
-	public String getParams() { return params; }
+
+	@CheckForNull
+	public String getParams() {
+		return params;
+	}
+
+	@DataBoundSetter
+	public void setParams(@CheckForNull String params) {
+		this.params = Util.fixNull(params);
+	}
+
+	@CheckForNull
 	public String getSandboxName() {
 		return sandboxName;
 	}
+
+	@DataBoundSetter
+	public void setSandboxName(@CheckForNull String sandboxName) {
+		this.sandboxName = Util.fixNull(sandboxName);
+	}
+
+	@CheckForNull
 	public String getSandboxDomain() {
 		return sandboxDomain;
 	}
 
+	@DataBoundSetter
+	public void setSandboxDomain(@CheckForNull String sandboxDomain) {
+		this.sandboxDomain = Util.fixNull(sandboxDomain);
+	}
+
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener, QsServerDetails server) throws Exception {
+
+        assert sandboxDomain != null;
+        if (!sandboxDomain.isEmpty()) {
+			server = new QsServerDetails(server.serverAddress, server.user, server.pw, sandboxDomain, server.ignoreSSL);
+		}
+
 		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server);
 		String sandboxId = gateway.TryStartBlueprint(blueprintName,
 				Integer.parseInt(sandboxDuration),
