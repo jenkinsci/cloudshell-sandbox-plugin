@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
+import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
 import com.quali.cloudshell.qsExceptions.InvalidApiCallException;
 import com.quali.cloudshell.qsExceptions.ReserveBluePrintConflictException;
@@ -21,9 +22,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StepsCommon {
-    public String startSandbox(TaskListener listener, String name, int duration, String parameters, String sandboxName, int timeout)
+    String startSandbox(TaskListener listener, String name, int duration, String parameters, String sandboxName, int timeout, String sandboxDomain)
             throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
-        SandboxApiGateway gateway = getSandboxApiGateway(listener);
+
+            if (sandboxDomain == null || sandboxDomain.isEmpty())
+            {
+                return InitiateBlueprintStart(name, duration, parameters, sandboxName, timeout, getSandboxApiGateway(listener));
+            }
+            return InitiateBlueprintStart(name, duration, parameters, sandboxName, timeout, getSandboxApiGateway(listener, sandboxDomain));
+        }
+
+    String startSandbox(TaskListener listener, String name, int duration, String parameters, String sandboxName, int timeout)
+        throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InterruptedException {
+
+        return InitiateBlueprintStart(name, duration, parameters, sandboxName, timeout, getSandboxApiGateway(listener));
+    }
+
+    private String InitiateBlueprintStart(String name, int duration, String parameters, String sandboxName, int timeout, SandboxApiGateway gateway) throws SandboxApiException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
         return gateway.TryStartBlueprint(name,
                 duration,
                true,
@@ -32,7 +47,7 @@ public class StepsCommon {
                timeout);
     }
 
-    public void stopSandbox(TaskListener listener, String sandboxId, StepContext context){
+    void stopSandbox(TaskListener listener, String sandboxId, StepContext context){
         listener.getLogger().println("Sandbox plugin:  Sandbox Cleanup in progress");
         try {
             SandboxApiGateway gateway = getSandboxApiGateway(listener);
@@ -52,10 +67,21 @@ public class StepsCommon {
     }
 
     private SandboxApiGateway getSandboxApiGateway(TaskListener listener) throws SandboxApiException {
-        CloudShellConfig.DescriptorImpl descriptorImpl =
-                (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
+        QsServerDetails server = GetCloudShellServerConfig();
         return new SandboxApiGateway(
                 new QsJenkinsTaskLogger(listener),
-                descriptorImpl.getServer());
+                server);
+    }
+
+    private QsServerDetails GetCloudShellServerConfig() {
+        CloudShellConfig.DescriptorImpl descriptorImpl =
+                (CloudShellConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(CloudShellConfig.class);
+        return descriptorImpl.getServer();
+    }
+
+    private SandboxApiGateway getSandboxApiGateway(TaskListener listener, String domain) throws SandboxApiException {
+        QsServerDetails server = GetCloudShellServerConfig();
+        QsServerDetails tempQsServerDetails = new QsServerDetails(server.serverAddress, server.user, server.pw, domain, server.ignoreSSL);
+        return new SandboxApiGateway(new QsJenkinsTaskLogger(listener), tempQsServerDetails);
     }
 }

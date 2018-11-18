@@ -18,5 +18,8 @@
         <f:entry field="sandboxName" title="Sandbox name">
             <f:textbox />
         </f:entry>
+        <f:entry title="${%Domain name}" field="sandboxDomain">
+              <f:textbox />
+        </f:entry>
     </f:advanced>
 </j:jelly>
