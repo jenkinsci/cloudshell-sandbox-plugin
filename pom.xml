@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>cloudshell-sandbox</artifactId>
-  <version>1.6.5-SNAPSHOT</version>
+  <version>1.6.4-beta</version>
   <packaging>hpi</packaging>
 
   <properties>
