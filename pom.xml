@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>cloudshell-sandbox</artifactId>
-  <version>1.6.4-beta</version>
+  <version>1.6.4-beta-2</version>
   <packaging>hpi</packaging>
 
   <properties>
@@ -75,7 +75,6 @@
   </pluginRepositories>
 
   <dependencies>
-
     <dependency>
       <groupId>com.quali.cloudshell</groupId>
       <artifactId>sandbox-api</artifactId>
@@ -147,8 +146,6 @@
       <version>1.9</version>
       <scope>test</scope>
     </dependency>
-
-
   </dependencies>
 
 </project>
