@@ -34,6 +34,7 @@ import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -53,7 +54,7 @@ public class SandboxStep extends AbstractStepImpl {
 
     @Deprecated
     @DataBoundConstructor
-    public SandboxStep(@Nonnull String name, int maxDuration, String params, String sandboxName, String sandboxDomain, int timeout) {
+    public SandboxStep(@Nonnull String name, int maxDuration, String params, String sandboxName, String sandboxDomain,  int timeout) {
         this.name = name;
         this.maxDuration = maxDuration;
         this.params = params;
@@ -110,7 +111,7 @@ public class SandboxStep extends AbstractStepImpl {
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            sandboxId = stepsCommon.startSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout);
+            sandboxId = stepsCommon.startSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout, step.sandboxDomain);
             return false;
         }
 
@@ -192,6 +193,5 @@ public class SandboxStep extends AbstractStepImpl {
             String sandboxDomain = formData.getString("sandboxDomain");
             return new SandboxStep(name, duration, params, sandboxName, sandboxDomain, timeout);
         }
-
     }
 }
