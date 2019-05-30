@@ -25,16 +25,17 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
+import com.quali.cloudshell.Constants;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import jnr.constants.Constant;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -100,7 +101,7 @@ public class SandboxStep extends AbstractStepImpl {
             listener.getLogger().println("Aborting CloudShell Sandbox!");
             if (sandboxId != null && !sandboxId.isEmpty())
             {
-                new StepsCommon().stopSandbox(listener, sandboxId, getContext());
+                new StepsCommon().stopSandbox(listener, sandboxId, getContext(), Constants.CONNECT_TIMEOUT_SECONDS);
             }
         }
 
@@ -111,7 +112,7 @@ public class SandboxStep extends AbstractStepImpl {
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            sandboxId = stepsCommon.startSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout, step.sandboxDomain);
+            sandboxId = stepsCommon.startSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout, step.sandboxDomain, Constants.CONNECT_TIMEOUT_SECONDS);
             return false;
         }
 
@@ -128,7 +129,7 @@ public class SandboxStep extends AbstractStepImpl {
 
             private void stopSandbox(StepContext context) {
                 StepsCommon stepsCommon = new StepsCommon();
-                stepsCommon.stopSandbox(listener, sandboxId, context);
+                stepsCommon.stopSandbox(listener, sandboxId, context, Constants.CONNECT_TIMEOUT_SECONDS);
             }
 
             @Override

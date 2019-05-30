@@ -15,6 +15,7 @@
 package org.jenkinsci.plugins.cloudshell.builders;
 
 import com.google.gson.Gson;
+import com.quali.cloudshell.Constants;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
 import hudson.Extension;
@@ -36,6 +37,7 @@ public class StartSandbox extends CloudShellBuildStep {
 	private final String blueprintName;
 	private final String sandboxDuration;
 	private final int maxWaitForSandboxAvailability;
+	private int setupTimeout;
 
 	@CheckForNull
 	private String sandboxDomain;
@@ -45,10 +47,11 @@ public class StartSandbox extends CloudShellBuildStep {
 	private String params;
 
 	@DataBoundConstructor
-	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability) {
+	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability, int setupTimeout) {
 		this.blueprintName = blueprintName;
 		this.sandboxDuration = sandboxDuration;
 		this.maxWaitForSandboxAvailability = maxWaitForSandboxAvailability;
+		this.setupTimeout = setupTimeout;
 	}
 
 	public String getBlueprintName() {
@@ -59,6 +62,9 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 	public int getMaxWaitForSandboxAvailability() {
 		return maxWaitForSandboxAvailability;
+	}
+	public int getSetupTimeout() {
+		return setupTimeout;
 	}
 
 	@CheckForNull
@@ -98,8 +104,13 @@ public class StartSandbox extends CloudShellBuildStep {
 			server = new QsServerDetails(server.serverAddress, server.user, server.pw, sandboxDomain, server.ignoreSSL);
 		}
 
-		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server);
-		String sandboxId = gateway.TryStartBlueprint(blueprintName,
+		if (setupTimeout == 0)
+			setupTimeout = Constants.CONNECT_TIMEOUT_SECONDS;
+		else
+			setupTimeout = setupTimeout*60;
+
+		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server, setupTimeout);
+        String sandboxId = gateway.TryStartBlueprint(blueprintName,
 				Integer.parseInt(sandboxDuration),
 				true,
 				(sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
