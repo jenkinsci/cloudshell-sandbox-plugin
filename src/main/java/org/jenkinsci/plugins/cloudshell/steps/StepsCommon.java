@@ -56,7 +56,7 @@ public class StepsCommon {
                 listener.getLogger().println("Teardown process cannot be verified, please use newer version of CloudShell to support this feature.");
             }
         } catch (TeardownFailedException e) {
-            listener.error("Teardown ended with erroes, see sandbox:  " + sandboxId);
+            listener.error("Teardown ended with errors, see sandbox:  " + sandboxId);
             context.setResult(Result.FAILURE);
         } catch (SandboxApiException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
            listener.error("Failed to stop sandbox:  " + e.getMessage() + ". \n" + Arrays.toString(e.getStackTrace()));
