@@ -86,7 +86,7 @@ public class SandboxStartStep extends AbstractStepImpl {
             return "startSandbox";
         }
 
-        @Override public String getDisplayName() { return "starts a CloudShell Sandbox";
+        @Override public String getDisplayName() { return "Starts a CloudShell Sandbox";
         }
     }
 
