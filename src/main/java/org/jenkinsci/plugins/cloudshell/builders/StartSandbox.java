@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.quali.cloudshell.Constants;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.qsExceptions.ExtendedSandboxApiException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Util;
@@ -104,22 +105,30 @@ public class StartSandbox extends CloudShellBuildStep {
 			server = new QsServerDetails(server.serverAddress, server.user, server.pw, sandboxDomain, server.ignoreSSL);
 		}
 
+		int customSetupTimeout =0;
 		if (setupTimeout == 0)
-			setupTimeout = Constants.CONNECT_TIMEOUT_SECONDS;
+			customSetupTimeout = Constants.CONNECT_TIMEOUT_SECONDS;
 		else
-			setupTimeout = setupTimeout*60;
+			customSetupTimeout= setupTimeout*60;
 
-		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server, setupTimeout);
-        String sandboxId = gateway.TryStartBlueprint(blueprintName,
-				Integer.parseInt(sandboxDuration),
-				true,
-				(sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
-				gateway.TryParseBlueprintParams(params),
-				maxWaitForSandboxAvailability);
-
-		Gson gson = new Gson();
-		String sandboxDetails = gson.toJson(gateway.GetSandboxDetails(sandboxId));
-		addSandboxToBuildActions(build, server, sandboxId, sandboxDetails);
+		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server, customSetupTimeout);
+        String sandboxId = "";
+		try {
+			sandboxId = gateway.TryStartBlueprint(blueprintName,
+					Integer.parseInt(sandboxDuration),
+					true,
+					(sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
+					gateway.TryParseBlueprintParams(params),
+					maxWaitForSandboxAvailability);
+			Gson gson = new Gson();
+			String sandboxDetails = gson.toJson(gateway.GetSandboxDetails(sandboxId));
+			addSandboxToBuildActions(build, server, sandboxId, sandboxDetails);
+		}
+		catch (ExtendedSandboxApiException e)
+		{
+			addSandboxToBuildActions(build, server, e.getSandboxId(), "");
+			throw e;
+		}
 		return true;
 	}
 
