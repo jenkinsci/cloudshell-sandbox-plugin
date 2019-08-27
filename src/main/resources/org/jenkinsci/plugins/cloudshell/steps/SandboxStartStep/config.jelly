@@ -16,7 +16,7 @@
             <f:textbox default="10"/>
         </f:entry>
         <f:entry title="${%Setup timeout (Minutes)}" field="setupTimeout">
-              <f:textbox default="5"/>
+              <f:textbox default="300"/>
         </f:entry>
         <f:entry field="sandboxName" title="Sandbox name">
             <f:textbox />
