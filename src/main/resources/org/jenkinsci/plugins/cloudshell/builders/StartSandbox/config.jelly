@@ -12,6 +12,9 @@
                 <f:entry title="${%Timeout if sandbox unavailable (minutes)}" field="maxWaitForSandboxAvailability">
                       <f:textbox default="10"/>
                 </f:entry>
+                <f:entry title="${%Setup timeout (Minutes)}" field="setupTimeout">
+                      <f:textbox default="300"/>
+                </f:entry>
                 <f:entry title="${%Blueprint parameters}" field="params">
                   <f:textbox />
                 </f:entry>

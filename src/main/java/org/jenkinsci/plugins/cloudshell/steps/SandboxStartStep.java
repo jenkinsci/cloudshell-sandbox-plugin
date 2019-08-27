@@ -27,13 +27,14 @@ public class SandboxStartStep extends AbstractStepImpl {
     @CheckForNull
     private String params;
 
+    private int setupTimeout;
+
     @DataBoundConstructor
     public SandboxStartStep(@Nonnull String name, int duration, int timeout) {
         this.name = name;
         this.duration = duration;
         this.timeout = timeout;
     }
-
 
     @CheckForNull
     public String getParams() {
@@ -53,6 +54,15 @@ public class SandboxStartStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setSandboxName(@CheckForNull String sandboxName) {
         this.sandboxName = Util.fixNull(sandboxName);
+    }
+
+    public int getSetupTimeout() {
+        return setupTimeout;
+    }
+
+    @DataBoundSetter
+    public void setSetupTimeout( int setupTimeout) {
+        this.setupTimeout = setupTimeout;
     }
 
     @CheckForNull
@@ -91,7 +101,7 @@ public class SandboxStartStep extends AbstractStepImpl {
         @Override
         protected String run() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-            return stepsCommon.startSandbox(listener, step.name, step.duration ,step.params, step.sandboxName, step.timeout, step.sandboxDomain);
+            return stepsCommon.startSandbox(listener, step.name, step.duration ,step.params, step.sandboxName, step.timeout, step.sandboxDomain, step.setupTimeout*60);
         }
 
         private static final long serialVersionUID = 1L;

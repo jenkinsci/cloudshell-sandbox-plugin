@@ -15,8 +15,10 @@
 package org.jenkinsci.plugins.cloudshell.builders;
 
 import com.google.gson.Gson;
+import com.quali.cloudshell.Constants;
 import com.quali.cloudshell.QsServerDetails;
 import com.quali.cloudshell.SandboxApiGateway;
+import com.quali.cloudshell.qsExceptions.ExtendedSandboxApiException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Util;
@@ -36,6 +38,7 @@ public class StartSandbox extends CloudShellBuildStep {
 	private final String blueprintName;
 	private final String sandboxDuration;
 	private final int maxWaitForSandboxAvailability;
+	private int setupTimeout;
 
 	@CheckForNull
 	private String sandboxDomain;
@@ -45,10 +48,11 @@ public class StartSandbox extends CloudShellBuildStep {
 	private String params;
 
 	@DataBoundConstructor
-	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability) {
+	public StartSandbox(String blueprintName, String sandboxDuration, int maxWaitForSandboxAvailability, int setupTimeout) {
 		this.blueprintName = blueprintName;
 		this.sandboxDuration = sandboxDuration;
 		this.maxWaitForSandboxAvailability = maxWaitForSandboxAvailability;
+		this.setupTimeout = setupTimeout;
 	}
 
 	public String getBlueprintName() {
@@ -59,6 +63,9 @@ public class StartSandbox extends CloudShellBuildStep {
 	}
 	public int getMaxWaitForSandboxAvailability() {
 		return maxWaitForSandboxAvailability;
+	}
+	public int getSetupTimeout() {
+		return setupTimeout;
 	}
 
 	@CheckForNull
@@ -98,17 +105,30 @@ public class StartSandbox extends CloudShellBuildStep {
 			server = new QsServerDetails(server.serverAddress, server.user, server.pw, sandboxDomain, server.ignoreSSL);
 		}
 
-		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server);
-		String sandboxId = gateway.TryStartBlueprint(blueprintName,
-				Integer.parseInt(sandboxDuration),
-				true,
-				(sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
-				gateway.TryParseBlueprintParams(params),
-				maxWaitForSandboxAvailability);
+		int customSetupTimeout =0;
+		if (setupTimeout == 0)
+			customSetupTimeout = Constants.CONNECT_TIMEOUT_SECONDS;
+		else
+			customSetupTimeout= setupTimeout*60;
 
-		Gson gson = new Gson();
-		String sandboxDetails = gson.toJson(gateway.GetSandboxDetails(sandboxId));
-		addSandboxToBuildActions(build, server, sandboxId, sandboxDetails);
+		SandboxApiGateway gateway = new SandboxApiGateway(new QsJenkinsTaskLogger(listener), server, customSetupTimeout);
+        String sandboxId = "";
+		try {
+			sandboxId = gateway.TryStartBlueprint(blueprintName,
+					Integer.parseInt(sandboxDuration),
+					true,
+					(sandboxName == null || sandboxName.isEmpty()) ? null : sandboxName,
+					gateway.TryParseBlueprintParams(params),
+					maxWaitForSandboxAvailability);
+			Gson gson = new Gson();
+			String sandboxDetails = gson.toJson(gateway.GetSandboxDetails(sandboxId));
+			addSandboxToBuildActions(build, server, sandboxId, sandboxDetails);
+		}
+		catch (ExtendedSandboxApiException e)
+		{
+			addSandboxToBuildActions(build, server, e.getSandboxId(), "");
+			throw e;
+		}
 		return true;
 	}
 
