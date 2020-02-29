@@ -108,22 +108,31 @@ public class CloudShellConfig extends Builder {
             return FormValidation.ok("Test completed successfully");
 		}
 
-		public FormValidation doCheckPw(@QueryParameter String value) {
-			if(value.isEmpty())
+		public FormValidation doCheckPw(@QueryParameter String value, @QueryParameter String serverAddress) {
+			if(serverAddress.isEmpty())
+				return FormValidation.ok();
+
+        	if(value.isEmpty())
 				return FormValidation.errorWithMarkup("Password cannot be empty");
 			else
 				return FormValidation.ok();
 		}
 
-		public FormValidation doCheckUser(@QueryParameter String value) {
+		public FormValidation doCheckUser(@QueryParameter String value, @QueryParameter String serverAddress) {
+			if(serverAddress.isEmpty())
+				return FormValidation.ok();
+
 			if(value.isEmpty())
 				return FormValidation.errorWithMarkup("User cannot be empty");
 			else
 				return FormValidation.ok();
 		}
 
-		public FormValidation doCheckDomain(@QueryParameter String value) {
-			if(value.isEmpty())
+		public FormValidation doCheckDomain(@QueryParameter String value, @QueryParameter String serverAddress) {
+			if(serverAddress.isEmpty())
+				return FormValidation.ok();
+
+        	if(value.isEmpty())
 				return FormValidation.errorWithMarkup("Domain cannot be empty");
 			else
 				return FormValidation.ok();
@@ -131,13 +140,16 @@ public class CloudShellConfig extends Builder {
 
 
 		public FormValidation doCheckServerAddress(@QueryParameter String value) {
-//			String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+			if(value.isEmpty())
+				return FormValidation.ok();
+
 			String regex = "^(https?)://[-a-zA-Z0-9-_.:]*[0-9]";
 			if(value.matches(regex))
 				return FormValidation.ok();
 			else
 				return FormValidation.errorWithMarkup("Invalid server address, see help for more details");
 		}
+
 
 
 		@Override

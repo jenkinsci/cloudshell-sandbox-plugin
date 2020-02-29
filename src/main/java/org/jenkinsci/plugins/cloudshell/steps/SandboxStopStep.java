@@ -8,16 +8,28 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 
 public class SandboxStopStep extends AbstractStepImpl {
 
-    public final String reservationId;
+    public final String sandboxId;
+
+    private int teardownTimeout;
 
     @DataBoundConstructor
-    public SandboxStopStep(@Nonnull String reservationId) {
-        this.reservationId = reservationId;
+    public SandboxStopStep(@Nonnull String sandboxId) {
+        this.sandboxId = sandboxId;
+    }
+
+    public int getTeardownTimeout() {
+        return teardownTimeout;
+    }
+
+    @DataBoundSetter
+    public void setTeardownTimeout(int teardownTimeout) {
+        this.teardownTimeout = teardownTimeout;
     }
 
     @Extension
@@ -32,7 +44,7 @@ public class SandboxStopStep extends AbstractStepImpl {
         }
 
         @Override public String getDisplayName() {
-            return "stops a cloudshell sandbox";
+            return "Stops a CloudShell Sandbox";
         }
     }
 
@@ -49,7 +61,7 @@ public class SandboxStopStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             StepsCommon stepsCommon = new StepsCommon();
-            stepsCommon.stopSandbox(listener, step.reservationId, getContext());
+            stepsCommon.stopSandbox(listener, step.sandboxId, getContext(), step.teardownTimeout*60);
             return null;
         }
     }

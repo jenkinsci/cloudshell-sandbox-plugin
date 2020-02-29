@@ -28,11 +28,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Post-build step that allow stop all matched container
- *
- * @author magnayn
- */
 public class CloudShellPublisherControl extends Recorder implements Serializable {
 
     @DataBoundConstructor

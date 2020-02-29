@@ -25,10 +25,12 @@
 package org.jenkinsci.plugins.cloudshell.steps;
 
 import com.google.inject.Inject;
+import com.quali.cloudshell.Constants;
 import com.quali.cloudshell.qsExceptions.SandboxApiException;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import jnr.constants.Constant;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -53,7 +55,7 @@ public class SandboxStep extends AbstractStepImpl {
 
     @Deprecated
     @DataBoundConstructor
-    public SandboxStep(@Nonnull String name, int maxDuration, String params, String sandboxName, String sandboxDomain, int timeout) {
+    public SandboxStep(@Nonnull String name, int maxDuration, String params, String sandboxName, String sandboxDomain,  int timeout) {
         this.name = name;
         this.maxDuration = maxDuration;
         this.params = params;
@@ -99,7 +101,7 @@ public class SandboxStep extends AbstractStepImpl {
             listener.getLogger().println("Aborting CloudShell Sandbox!");
             if (sandboxId != null && !sandboxId.isEmpty())
             {
-                new StepsCommon().stopSandbox(listener, sandboxId, getContext());
+                new StepsCommon().stopSandbox(listener, sandboxId, getContext(), Constants.CONNECT_TIMEOUT_SECONDS);
             }
         }
 
@@ -110,7 +112,7 @@ public class SandboxStep extends AbstractStepImpl {
                 KeyManagementException,
                 IOException, InterruptedException {
 
-            sandboxId = stepsCommon.startSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout);
+            sandboxId = stepsCommon.startSandbox(listener, step.name, step.maxDuration, step.params, step.sandboxName, step.timeout, step.sandboxDomain, Constants.CONNECT_TIMEOUT_SECONDS);
             return false;
         }
 
@@ -127,7 +129,7 @@ public class SandboxStep extends AbstractStepImpl {
 
             private void stopSandbox(StepContext context) {
                 StepsCommon stepsCommon = new StepsCommon();
-                stepsCommon.stopSandbox(listener, sandboxId, context);
+                stepsCommon.stopSandbox(listener, sandboxId, context, Constants.CONNECT_TIMEOUT_SECONDS);
             }
 
             @Override
@@ -192,6 +194,5 @@ public class SandboxStep extends AbstractStepImpl {
             String sandboxDomain = formData.getString("sandboxDomain");
             return new SandboxStep(name, duration, params, sandboxName, sandboxDomain, timeout);
         }
-
     }
 }
