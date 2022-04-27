@@ -67,10 +67,6 @@
       <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
     <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://mvnrepository.com</url>
-    </repository>
-    <repository>
       <id>central</id>
       <name>Central Repository</name>
       <url>https://repo.maven.apache.org/maven2</url> <!-- the https you've been looking for -->
