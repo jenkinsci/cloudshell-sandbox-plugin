@@ -66,6 +66,15 @@
       <id>repo.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url> <!-- the https you've been looking for -->
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled> <!-- or set to true if desired, default is false -->
+      </snapshots>
+    </repository>
   </repositories>
 
   <pluginRepositories>
