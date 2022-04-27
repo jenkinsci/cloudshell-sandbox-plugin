@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>cloudshell-sandbox</artifactId>
-  <version>1.8.4-SNAPSHOT</version>
+  <version>1.8.4</version>
   <packaging>hpi</packaging>
 
 
@@ -28,7 +28,7 @@
     <connection>scm:git:git://github.com/jenkinsci/cloudshell-sandbox-plugin.git</connection>
     <developerConnection>scm:git:git://github.com/jenkinsci/cloudshell-sandbox-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/cloudshell-sandbox-plugin</url>
-    <tag>HEAD</tag>
+    <tag>cloudshell-sandbox-1.8.4</tag>
   </scm>
 
   <distributionManagement>
