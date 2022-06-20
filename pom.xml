@@ -10,12 +10,13 @@
   </parent>
 
   <artifactId>cloudshell-sandbox</artifactId>
-  <version>1.6.4-beta</version>
+  <version>1.8.7-SNAPSHOT</version>
   <packaging>hpi</packaging>
+
 
   <properties>
     <jenkins.version>2.9</jenkins.version>
-    <java.level>7</java.level>
+    <java.level>8</java.level>
     <jenkins-test-harness.version>2.2</jenkins-test-harness.version>
   </properties>
 
@@ -24,10 +25,10 @@
   <url>https://wiki.jenkins.io/display/JENKINS/CloudShell+Sandbox+Plugin</url>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/cloudshell-sandbox-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/cloudshell-sandbox-plugin.git</developerConnection>
+    <connection>scm:git:https://github.com/jenkinsci/cloudshell-sandbox-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/jenkinsci/cloudshell-sandbox-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/cloudshell-sandbox-plugin</url>
-    <tag>HEAD</tag>
+    <tag>cloudshell-sandbox-1.8.4</tag>
   </scm>
 
   <distributionManagement>
@@ -63,23 +64,31 @@
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url> <!-- the https you've been looking for -->
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled> <!-- or set to true if desired, default is false -->
+      </snapshots>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
 
   <dependencies>
-
     <dependency>
       <groupId>com.quali.cloudshell</groupId>
       <artifactId>sandbox-api</artifactId>
-      <version>1.1.0.14</version>
+      <version>1.3.0.4</version>
     </dependency>
 
     <dependency>
@@ -93,6 +102,21 @@
       <artifactId>workflow-step-api</artifactId>
       <version>2.2</version>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.0</version>
+    </dependency>
+
+
+  <dependency>
+    <groupId>org.codehaus.mojo.signature</groupId>
+    <artifactId>java18</artifactId>
+    <version>1.0</version>
+    <type>signature</type>
+  </dependency>
 
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -147,8 +171,26 @@
       <version>1.9</version>
       <scope>test</scope>
     </dependency>
-
-
   </dependencies>
+
+  <build>
+       <plugins>
+       <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>3.0.4</version>
+          <configuration>
+            <failOnError>${maven.findbugs.failure.strict}</failOnError>
+          </configuration>
+        </plugin>
+      <plugin>
+        <groupId>org.jenkins-ci.tools</groupId>
+        <artifactId>maven-hpi-plugin</artifactId>
+        <configuration>
+          <disabledTestInjection>true</disabledTestInjection>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
